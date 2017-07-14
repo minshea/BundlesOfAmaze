@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  bundlesofamaze:
+    image: bundlesofamaze
+    build:
+      context: ./BundlesOfAmaze
+      dockerfile: Dockerfile
+    extra_hosts:  
+      - "hyperion:192.168.0.11"

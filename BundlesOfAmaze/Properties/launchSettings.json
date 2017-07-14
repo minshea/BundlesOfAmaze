@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "BundlesOfAmaze": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "NETCORE_ENVIRONMENT": "development"
+      }
+    }
+  }
+}

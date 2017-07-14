@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.15
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundlesOfAmaze", "BundlesOfAmaze\BundlesOfAmaze.csproj", "{7E326CD6-3B53-4ED7-90E8-F23FC9853F6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundlesOfAmaze.Application", "BundlesOfAmaze.Application\BundlesOfAmaze.Application.csproj", "{E9AB497A-4E4A-47F9-A626-E6B8FA55E47C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundlesOfAmaze.Data", "BundlesOfAmaze.Data\BundlesOfAmaze.Data.csproj", "{D5A0B47B-5C95-4716-BB80-DEE47538489D}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{F8B477A7-B077-4599-900D-B043C28B0A2F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7E326CD6-3B53-4ED7-90E8-F23FC9853F6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E326CD6-3B53-4ED7-90E8-F23FC9853F6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E326CD6-3B53-4ED7-90E8-F23FC9853F6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E326CD6-3B53-4ED7-90E8-F23FC9853F6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9AB497A-4E4A-47F9-A626-E6B8FA55E47C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9AB497A-4E4A-47F9-A626-E6B8FA55E47C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9AB497A-4E4A-47F9-A626-E6B8FA55E47C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9AB497A-4E4A-47F9-A626-E6B8FA55E47C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5A0B47B-5C95-4716-BB80-DEE47538489D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5A0B47B-5C95-4716-BB80-DEE47538489D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5A0B47B-5C95-4716-BB80-DEE47538489D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5A0B47B-5C95-4716-BB80-DEE47538489D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8B477A7-B077-4599-900D-B043C28B0A2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8B477A7-B077-4599-900D-B043C28B0A2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8B477A7-B077-4599-900D-B043C28B0A2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8B477A7-B077-4599-900D-B043C28B0A2F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
