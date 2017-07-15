@@ -4,19 +4,28 @@ namespace BundlesOfAmaze.Data
 {
     public class DataContext : DbContext, IDataContext
     {
+        private readonly string _connectionString;
         public DbSet<Cat> Cats { get; set; }
 
-        private const string ConnectionString = @"Server=hyperion;Database=BundlesOfAmaze;User Id=development;Password=development;";
+        public DataContext(string connectionString)
+        {
+            // This constructor is used during runtime
+            _connectionString = connectionString;
+        }
+
+        public DataContext(DbContextOptions options)
+            : base(options)
+        {
+            // This constructor is used by EF migrations
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            ////if (!optionsBuilder.IsConfigured)
-            ////{
-            ////    optionsBuilder.UseSqlServer(ConnectionString);
-            ////}
-
-            optionsBuilder.UseSqlServer(ConnectionString);
-            base.OnConfiguring(optionsBuilder);
+            // Only configure the conenction string during normal runtime
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer(_connectionString);
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -26,7 +26,7 @@ namespace BundlesOfAmaze
                 return;
             }
 
-            var result = await _commandService.Handle(msg);
+            var result = await _commandService.HandleAsync(msg);
             if (result == null)
             {
                 return;

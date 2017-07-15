@@ -17,18 +17,20 @@ namespace BundlesOfAmaze.Data
             _dataContext = dataContext;
         }
 
-        ////private IQueryable<Cat> Queryable()
-        ////{
-        ////    return _dataContext.Cats.Include(i => i.Stats);
-        ////}
+        private IQueryable<Cat> Queryable
+        {
+            get
+            {
+                return _dataContext.Cats.Include(i => i.Stats);
+            }
+        }
 
         /// <summary>Finds a cat by name asynchronous.</summary>
         /// <param name="name">The name.</param>
         /// <returns>A <see cref="Cat"/> instance.</returns>
         public async Task<Cat> FindByNameAsync(string name)
         {
-            var result = await _dataContext.Cats.FirstOrDefaultAsync(i => i.Name == name);
-            return result;
+            return await Queryable.FirstOrDefaultAsync(i => i.Name == name);
         }
 
         /// <summary>Finds a cat by owner asynchronous.</summary>
@@ -36,15 +38,14 @@ namespace BundlesOfAmaze.Data
         /// <returns>A <see cref="Cat"/> instance.</returns>
         public async Task<Cat> FindByOwnerAsync(string ownerId)
         {
-            var result = await _dataContext.Cats.FirstOrDefaultAsync(i => i.OwnerId == ownerId);
-            return result;
+            return await Queryable.FirstOrDefaultAsync(i => i.OwnerId == ownerId);
         }
 
         /// <summary>Finds all cats.</summary>
         /// <returns>A <see cref="IEnumerable{Cat}"/> instance.</returns>
         public async Task<IEnumerable<Cat>> FindAllAsync()
         {
-            return await _dataContext.Cats.ToListAsync();
+            return await Queryable.ToListAsync();
         }
 
         /// <summary>Adds the entity asynchronous.</summary>

@@ -3,15 +3,13 @@
     public class Commands
     {
         public const string Prefix = ".amazecats";
+        public const string Help = "help";
         public const string Create = "create";
-        public const string Feed = "feed";
-        public const string Poke = "poke";
+        public const string Give = "give";
 
         public const string List = "list";
+        public const string ListCats = "cats";
         public const string ListAdventures = "adventures";
-        public const string ListJobs = "jobs"; // lick other cat, etc
-
-        public const string Help = "help";
-        public const string HelpCreate = "create";
+        public const string ListActivities = "activities"; // lick other cat, etc
     }
 }

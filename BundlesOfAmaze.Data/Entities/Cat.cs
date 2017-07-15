@@ -10,8 +10,6 @@ namespace BundlesOfAmaze.Data
 
         public Gender Gender { get; private set; }
 
-        public Personality Personality { get; private set; }
-
         public DateTimeOffset DateOfBirth { get; private set; }
 
         public Stats Stats { get; private set; }
@@ -22,16 +20,20 @@ namespace BundlesOfAmaze.Data
         {
         }
 
-        public Cat(string ownerId, string name, Gender gender, Personality personality)
+        public Cat(string ownerId, string name, Gender gender)
             : this()
         {
             OwnerId = ownerId;
             Name = name;
             Gender = gender;
-            Personality = personality;
 
             DateOfBirth = DateTimeOffset.UtcNow;
-            Stats = new Stats(100);
+            Stats = new Stats(50, 50);
+        }
+
+        public void Tick()
+        {
+            Console.WriteLine($"Handle {Name}");
         }
     }
 }

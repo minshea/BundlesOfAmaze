@@ -12,4 +12,10 @@
     <ProjectReference Include="..\BundlesOfAmaze.Data\BundlesOfAmaze.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Adventures\" />
+    <Folder Include="Events\" />
+    <Folder Include="Activities\" />
+  </ItemGroup>
+
 </Project>

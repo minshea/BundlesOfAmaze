@@ -5,6 +5,6 @@ namespace BundlesOfAmaze.Application
 {
     public interface ICommandService
     {
-        Task<ResultMessage> Handle(SocketUserMessage msg);
+        Task<ResultMessage> HandleAsync(SocketUserMessage msg);
     }
 }

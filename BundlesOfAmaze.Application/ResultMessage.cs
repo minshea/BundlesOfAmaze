@@ -12,6 +12,12 @@ namespace BundlesOfAmaze.Application
             Message = message;
         }
 
+        public ResultMessage(Embed embed)
+        {
+            Message = string.Empty;
+            Embed = embed;
+        }
+
         public ResultMessage(string message, Embed embed)
         {
             Message = message;
