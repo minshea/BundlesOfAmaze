@@ -13,7 +13,7 @@ namespace BundlesOfAmaze.Application
             _repository = repository;
         }
 
-        public async Task<ResultMessage> HandleAsync(long ownerId, string commandPart)
+        public async Task<ResultMessage> HandleAsync(Owner owner, string commandPart)
         {
             ////.amazecats list
             ////.amazecats list adventures

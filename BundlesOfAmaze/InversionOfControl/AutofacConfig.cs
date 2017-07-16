@@ -13,6 +13,7 @@ namespace BundlesOfAmaze.InversionOfControl
 
             builder.RegisterType<CatRepository>().As<ICatRepository>();
             builder.RegisterType<OwnerRepository>().As<IOwnerRepository>();
+            builder.RegisterType<ItemRepository>().As<IItemRepository>();
 
             builder.RegisterType<CommandService>().As<ICommandService>();
             builder.RegisterType<CreateCommandService>().As<ICreateCommandService>();

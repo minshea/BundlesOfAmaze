@@ -1,4 +1,6 @@
-﻿namespace BundlesOfAmaze.Data
+﻿using System;
+
+namespace BundlesOfAmaze.Data
 {
     public class OwnerInventoryItem : Entity
     {
@@ -23,6 +25,15 @@
         {
             ItemId = itemId;
             Quantity = quantity;
+        }
+
+        public void DecreaseQuantity(int amount)
+        {
+            Quantity -= amount;
+            if (Quantity < 0)
+            {
+                throw new InvalidOperationException("Amount can not be lower than 0");
+            }
         }
     }
 }

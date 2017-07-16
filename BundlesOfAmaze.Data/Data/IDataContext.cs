@@ -1,14 +1,13 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace BundlesOfAmaze.Data
 {
     public interface IDataContext
     {
-        DbSet<Owner> Owners { get; set; }
-
-        DbSet<Cat> Cats { get; set; }
+        /// <summary>Seeds this instance.</summary>
+        /// <returns></returns>
+        Task SeedAsync();
 
         /// <summary>Saves the changes asynchronous.</summary>
         /// <returns>The rows changed.</returns>

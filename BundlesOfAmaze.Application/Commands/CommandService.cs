@@ -63,13 +63,13 @@ namespace BundlesOfAmaze.Application
             switch (commandParts.ElementAtOrDefault(1))
             {
                 case Commands.Create:
-                    return await _createCommandService.HandleAsync(owner.Id, commandParts.ElementAtOrDefault(2), commandParts.ElementAtOrDefault(3));
+                    return await _createCommandService.HandleAsync(owner, commandParts.ElementAtOrDefault(2), commandParts.ElementAtOrDefault(3));
 
                 case Commands.Give:
-                    return await _giveCommandService.HandleAsync(owner.Id, commandParts.ElementAtOrDefault(2));
+                    return await _giveCommandService.HandleAsync(owner, commandParts.ElementAtOrDefault(2));
 
                 case Commands.List:
-                    return await _listCommandService.HandleAsync(owner.Id, commandParts.ElementAtOrDefault(2));
+                    return await _listCommandService.HandleAsync(owner, commandParts.ElementAtOrDefault(2));
 
                 case Commands.Help:
                     return await _helpCommandService.HandleAsync(commandParts.ElementAtOrDefault(2));

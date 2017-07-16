@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using BundlesOfAmaze.Shared;
 
 namespace BundlesOfAmaze.Data
 {
@@ -39,13 +40,29 @@ namespace BundlesOfAmaze.Data
             Gender = gender;
 
             DateOfBirth = DateTimeOffset.UtcNow;
-            Stats = new Stats(3600, 3600);
+            Stats = new Stats(HungerCap / 2, ThirstCap / 2);
         }
 
         public void Tick()
         {
             Console.WriteLine($"Handle {Name}");
             Stats.NeedsTick();
+        }
+
+        public void GiveItem(Item item, int quantity)
+        {
+            var foodItem = item as FoodItem;
+            if (foodItem != null)
+            {
+                if (foodItem.ItemType == ItemType.Food)
+                {
+                    Stats.Hunger = (Stats.Hunger + foodItem.FoodValue * quantity).Clamp(0, HungerCap);
+                }
+                else if (foodItem.ItemType == ItemType.Drink)
+                {
+                    Stats.Thirst = (Stats.Thirst + foodItem.FoodValue * quantity).Clamp(0, ThirstCap);
+                }
+            }
         }
 
         public string GetHungerLevel()

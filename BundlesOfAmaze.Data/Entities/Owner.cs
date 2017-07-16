@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace BundlesOfAmaze.Data
 {
@@ -25,6 +26,11 @@ namespace BundlesOfAmaze.Data
             ////Cat = cat;
 
             ////InventoryItems.Add(new OwnerInventoryItem());
+        }
+
+        public OwnerInventoryItem GetItem(long itemId)
+        {
+            return InventoryItems.FirstOrDefault(i => i.ItemId == itemId);
         }
     }
 }

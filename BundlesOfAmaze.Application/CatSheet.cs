@@ -4,7 +4,7 @@ using Discord;
 
 namespace BundlesOfAmaze.Application
 {
-    public class CatSheet
+    public static class CatSheet
     {
         public static Embed GetSheet(Cat cat)
         {

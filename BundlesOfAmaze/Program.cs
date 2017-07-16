@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Autofac;
 using BundlesOfAmaze.Application;
+using BundlesOfAmaze.Data;
 using BundlesOfAmaze.InversionOfControl;
 using Discord;
 using Discord.WebSocket;
@@ -35,6 +36,13 @@ namespace BundlesOfAmaze
             AutofacConfig.Register(builder, configuration.GetConnectionString("DataContext"));
             builder.RegisterInstance(configuration).As<IConfigurationRoot>().SingleInstance();
             Container = builder.Build();
+
+            // Seed data
+            using (var scope = Container.BeginLifetimeScope())
+            {
+                var dataContext = scope.Resolve<IDataContext>();
+                await dataContext.SeedAsync();
+            }
 
             // Configure Discord
             using (_client = await ConfigureDiscordCLientAsync(configuration))

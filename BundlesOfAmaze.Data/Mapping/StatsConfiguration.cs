@@ -8,7 +8,7 @@ namespace BundlesOfAmaze.Data
         public override void Map(EntityTypeBuilder<Stats> builder)
         {
             builder.ToTable(typeof(Stats).Name);
-            builder.HasKey(i => i.CatId);
+            builder.HasKey(i => i.Id);
         }
     }
 }

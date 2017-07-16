@@ -13,7 +13,7 @@ namespace BundlesOfAmaze.Application
             _repository = repository;
         }
 
-        public async Task<ResultMessage> HandleAsync(long ownerId, string rawName, string rawGender)
+        public async Task<ResultMessage> HandleAsync(Owner owner, string rawName, string rawGender)
         {
             ////.amazecats create Name Male
 
@@ -38,7 +38,7 @@ namespace BundlesOfAmaze.Application
             }
 
             // Generate the new cat
-            var newCat = new Cat(ownerId, name, gender);
+            var newCat = new Cat(owner.Id, name, gender);
 
             // Store the new cat
             await _repository.AddAsync(newCat);
