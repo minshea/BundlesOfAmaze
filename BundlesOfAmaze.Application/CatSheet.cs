@@ -25,7 +25,7 @@ namespace BundlesOfAmaze.Application
             {
                 IsInline = true,
                 Name = "Hunger",
-                Value = cat.Stats.GetHungerLevel()
+                Value = cat.GetHungerLevel()
             };
             embedBuilder.AddField(hungerField);
 
@@ -33,7 +33,7 @@ namespace BundlesOfAmaze.Application
             {
                 IsInline = true,
                 Name = "Thirst",
-                Value = cat.Stats.GetThirstLevel()
+                Value = cat.GetThirstLevel()
             };
             embedBuilder.AddField(thirstField);
 

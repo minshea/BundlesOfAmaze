@@ -8,20 +8,23 @@ namespace BundlesOfAmaze.Application
 {
     public class CommandService : ICommandService
     {
-        private readonly ICatRepository _repository;
+        private readonly IOwnerRepository _ownerRepository;
+        private readonly ICatRepository _catRepository;
         private readonly ICreateCommandService _createCommandService;
         private readonly IHelpCommandService _helpCommandService;
         private readonly IGiveCommandService _giveCommandService;
         private readonly IListCommandService _listCommandService;
 
         public CommandService(
-            ICatRepository repository,
+            IOwnerRepository ownerRepository,
+            ICatRepository catRepository,
             ICreateCommandService createCommandService,
             IHelpCommandService helpCommandService,
             IGiveCommandService giveCommandService,
             IListCommandService listCommandService)
         {
-            _repository = repository;
+            _ownerRepository = ownerRepository;
+            _catRepository = catRepository;
             _createCommandService = createCommandService;
             _helpCommandService = helpCommandService;
             _giveCommandService = giveCommandService;
@@ -38,40 +41,49 @@ namespace BundlesOfAmaze.Application
                 return null;
             }
 
-            var ownerId = msg.Author.Id.ToString();
+            var authorId = msg.Author.Id.ToString();
+            var owner = await _ownerRepository.FindByAuthorIdAsync(authorId);
+
+            if (owner == null)
+            {
+                // There is no owner yet. Check for the create command and generate one
+                switch (commandParts.ElementAtOrDefault(1))
+                {
+                    case Commands.Create:
+                        owner = new Owner(msg.Author.Id.ToString(), msg.Author.Username);
+                        await _ownerRepository.AddAsync(owner);
+                        await _ownerRepository.SaveChangesAsync();
+                        break;
+
+                    default:
+                        return new ResultMessage("You don't have a cat yet!\nCreate one using the 'create' command.");
+                }
+            }
 
             switch (commandParts.ElementAtOrDefault(1))
             {
                 case Commands.Create:
-                    return await _createCommandService.HandleAsync(ownerId, commandParts.ElementAtOrDefault(2), commandParts.ElementAtOrDefault(3));
+                    return await _createCommandService.HandleAsync(owner.Id, commandParts.ElementAtOrDefault(2), commandParts.ElementAtOrDefault(3));
 
                 case Commands.Give:
-                    return await _giveCommandService.HandleAsync(ownerId, commandParts.ElementAtOrDefault(2));
+                    return await _giveCommandService.HandleAsync(owner.Id, commandParts.ElementAtOrDefault(2));
 
                 case Commands.List:
-                    return await _listCommandService.HandleAsync(ownerId, commandParts.ElementAtOrDefault(2));
+                    return await _listCommandService.HandleAsync(owner.Id, commandParts.ElementAtOrDefault(2));
 
                 case Commands.Help:
                     return await _helpCommandService.HandleAsync(commandParts.ElementAtOrDefault(2));
 
                 default:
-                    var cat1 = await _repository.FindByOwnerAsync(ownerId);
+                    var cat1 = await _catRepository.FindByOwnerAsync(owner.Id);
                     if (cat1 == null)
                     {
-                        return new ResultMessage("You don't have a cat yet!\nCreate on using the 'create' command.");
+                        return new ResultMessage(
+                            "You don't have a cat yet!\nCreate one using the 'create' command.");
                     }
 
                     return new ResultMessage(CatSheet.GetSheet(cat1));
             }
         }
-
-        ////private async Task<ResultMessage> HandlePoke(Cat cat)
-        ////{
-        ////    ////.amazecats poke
-
-        ////    var result = $"{cat.Name} flops over\n";
-
-        ////    return new ResultMessage(result);
-        ////}
     }
 }

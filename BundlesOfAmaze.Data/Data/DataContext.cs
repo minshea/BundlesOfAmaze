@@ -4,8 +4,10 @@ namespace BundlesOfAmaze.Data
 {
     public class DataContext : DbContext, IDataContext
     {
-        private readonly string _connectionString;
+        public DbSet<Owner> Owners { get; set; }
         public DbSet<Cat> Cats { get; set; }
+
+        private readonly string _connectionString;
 
         public DataContext(string connectionString)
         {

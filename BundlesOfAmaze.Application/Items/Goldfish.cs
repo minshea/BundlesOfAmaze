@@ -1,8 +1,9 @@
 ﻿namespace BundlesOfAmaze.Application.Items
 {
-    public class Goldfish : Food
+    public class Goldfish : IFood
     {
-        public string Name = "GoldFish";
-        public string Description = @"Made from 24 carat gold! Shiny!";
+        public string Name => "Goldfish";
+        public string Description => "Made from 24 carat gold! Shiny!";
+        public int FoodValue => 14400;
     }
 }

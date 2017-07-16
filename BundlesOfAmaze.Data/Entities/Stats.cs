@@ -1,8 +1,16 @@
-﻿namespace BundlesOfAmaze.Data
+﻿using System;
+
+namespace BundlesOfAmaze.Data
 {
     public class Stats : Entity
     {
+        #region EF Mapping
+
         public long CatId { get; set; }
+
+        public virtual Cat Cat { get; private set; }
+
+        #endregion EF Mapping
 
         public int Hunger { get; set; }
 
@@ -18,8 +26,6 @@
 
         public int High { get; set; }
 
-        public virtual Cat Cat { get; private set; }
-
         protected Stats()
         {
         }
@@ -31,49 +37,15 @@
             Thirst = thirst;
         }
 
-        public void SetHunger(int hunger)
+        public void NeedsTick()
         {
-            Hunger = hunger;
-        }
+            Hunger -= 20;
+            Hunger = Hunger < 0 ? 0 : Hunger;
+            Console.WriteLine($"Hunger: {Hunger}");
 
-        public string GetHungerLevel()
-        {
-            if (Hunger > 95)
-            {
-                return "Completely stuffed!";
-            }
-
-            if (Hunger > 50)
-            {
-                return "Full";
-            }
-
-            if (Hunger > 15)
-            {
-                return "I'm getting hungry";
-            }
-
-            return "I'm starving";
-        }
-
-        public object GetThirstLevel()
-        {
-            if (Thirst > 95)
-            {
-                return "Completely soaked!";
-            }
-
-            if (Thirst > 50)
-            {
-                return "Full";
-            }
-
-            if (Thirst > 15)
-            {
-                return "Dehydrated";
-            }
-
-            return "Dry as a desert";
+            Thirst -= 10;
+            Thirst = Thirst < 0 ? 0 : Thirst;
+            Console.WriteLine($"Thirst: {Thirst}");
         }
     }
 }

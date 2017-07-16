@@ -1,10 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BundlesOfAmaze.Data
 {
     public class Cat : Entity
     {
-        public string OwnerId { get; private set; }
+        public long OwnerId { get; private set; }
 
         public string Name { get; private set; }
 
@@ -16,11 +17,21 @@ namespace BundlesOfAmaze.Data
 
         public string Addressing => Gender == Gender.Male ? "his" : "her";
 
+        [NotMapped]
+        public int HungerCap { get; private set; }
+
+        [NotMapped]
+        public int ThirstCap { get; private set; }
+
         protected Cat()
         {
+            // TODO: These caps will be modified by stats / items
+
+            HungerCap = 14400;
+            ThirstCap = 14400;
         }
 
-        public Cat(string ownerId, string name, Gender gender)
+        public Cat(long ownerId, string name, Gender gender)
             : this()
         {
             OwnerId = ownerId;
@@ -28,12 +39,57 @@ namespace BundlesOfAmaze.Data
             Gender = gender;
 
             DateOfBirth = DateTimeOffset.UtcNow;
-            Stats = new Stats(50, 50);
+            Stats = new Stats(3600, 3600);
         }
 
         public void Tick()
         {
             Console.WriteLine($"Handle {Name}");
+            Stats.NeedsTick();
+        }
+
+        public string GetHungerLevel()
+        {
+            var hungerPercentage = (float)Stats.Hunger / HungerCap * 100;
+
+            if (hungerPercentage > 95)
+            {
+                return "Completely stuffed!";
+            }
+
+            if (hungerPercentage > 50)
+            {
+                return "Full";
+            }
+
+            if (hungerPercentage > 15)
+            {
+                return "I'm getting hungry";
+            }
+
+            return "I'm starving";
+        }
+
+        public object GetThirstLevel()
+        {
+            var thirstPercentage = (float)Stats.Thirst / ThirstCap * 100;
+
+            if (thirstPercentage > 95)
+            {
+                return "Completely soaked!";
+            }
+
+            if (thirstPercentage > 50)
+            {
+                return "Full";
+            }
+
+            if (thirstPercentage > 15)
+            {
+                return "Dehydrated";
+            }
+
+            return "Dry as a desert";
         }
     }
 }

@@ -13,7 +13,7 @@ namespace BundlesOfAmaze.Application
             _repository = repository;
         }
 
-        public async Task<ResultMessage> HandleAsync(string ownerId, string rawName, string rawGender)
+        public async Task<ResultMessage> HandleAsync(long ownerId, string rawName, string rawGender)
         {
             ////.amazecats create Name Male
 

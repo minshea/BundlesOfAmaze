@@ -13,7 +13,7 @@ namespace BundlesOfAmaze.Data
         /// <summary>Finds a cat by owner asynchronous.</summary>
         /// <param name="ownerId">The owner identifier.</param>
         /// <returns>A <see cref="Cat"/> instance.</returns>
-        Task<Cat> FindByOwnerAsync(string ownerId);
+        Task<Cat> FindByOwnerAsync(long ownerId);
 
         /// <summary>Finds all cats.</summary>
         /// <returns>A <see cref="IEnumerable{Cat}"/> instance.</returns>

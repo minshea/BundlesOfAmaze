@@ -13,7 +13,7 @@ namespace BundlesOfAmaze.Application
             _repository = repository;
         }
 
-        public async Task<ResultMessage> HandleAsync(string ownerId, string item)
+        public async Task<ResultMessage> HandleAsync(long ownerId, string item)
         {
             ////.amazecats feed stuff
 

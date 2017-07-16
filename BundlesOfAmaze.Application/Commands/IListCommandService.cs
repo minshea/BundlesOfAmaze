@@ -4,6 +4,6 @@ namespace BundlesOfAmaze.Application
 {
     public interface IListCommandService
     {
-        Task<ResultMessage> HandleAsync(string ownerId, string command);
+        Task<ResultMessage> HandleAsync(long ownerId, string command);
     }
 }

@@ -6,6 +6,8 @@ namespace BundlesOfAmaze.Data
 {
     public interface IDataContext
     {
+        DbSet<Owner> Owners { get; set; }
+
         DbSet<Cat> Cats { get; set; }
 
         /// <summary>Saves the changes asynchronous.</summary>

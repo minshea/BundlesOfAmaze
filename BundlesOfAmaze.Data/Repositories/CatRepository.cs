@@ -36,7 +36,7 @@ namespace BundlesOfAmaze.Data
         /// <summary>Finds a cat by owner asynchronous.</summary>
         /// <param name="ownerId">The owner identifier.</param>
         /// <returns>A <see cref="Cat"/> instance.</returns>
-        public async Task<Cat> FindByOwnerAsync(string ownerId)
+        public async Task<Cat> FindByOwnerAsync(long ownerId)
         {
             return await Queryable.FirstOrDefaultAsync(i => i.OwnerId == ownerId);
         }

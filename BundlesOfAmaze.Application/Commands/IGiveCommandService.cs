@@ -4,6 +4,6 @@ namespace BundlesOfAmaze.Application
 {
     public interface IGiveCommandService
     {
-        Task<ResultMessage> HandleAsync(string ownerId, string item);
+        Task<ResultMessage> HandleAsync(long ownerId, string item);
     }
 }

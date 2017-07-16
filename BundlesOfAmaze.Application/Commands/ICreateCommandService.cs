@@ -4,6 +4,6 @@ namespace BundlesOfAmaze.Application
 {
     public interface ICreateCommandService
     {
-        Task<ResultMessage> HandleAsync(string ownerId, string rawName, string rawGender);
+        Task<ResultMessage> HandleAsync(long ownerId, string rawName, string rawGender);
     }
 }
