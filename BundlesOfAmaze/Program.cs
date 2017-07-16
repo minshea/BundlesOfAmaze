@@ -14,6 +14,7 @@ namespace BundlesOfAmaze
     internal class Program
     {
         public static IContainer Container;
+        private DiscordSocketClient _client;
 
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
@@ -21,6 +22,7 @@ namespace BundlesOfAmaze
         {
             var environmentName = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
 
+            // Load configuration
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", true, true)
@@ -34,6 +36,23 @@ namespace BundlesOfAmaze
             builder.RegisterInstance(configuration).As<IConfigurationRoot>().SingleInstance();
             Container = builder.Build();
 
+            // Configure Discord
+            using (_client = await ConfigureDiscordCLientAsync(configuration))
+            {
+                // Configure Hangfire
+                GlobalConfiguration.Configuration.UseSqlServerStorage(configuration.GetConnectionString("DataContext"));
+                RecurringJob.AddOrUpdate("Tick", () => Tick(), Cron.Minutely);
+
+                using (new BackgroundJobServer())
+                {
+                    // Block this task until the program is closed
+                    await Task.Delay(-1);
+                }
+            }
+        }
+
+        private async Task<DiscordSocketClient> ConfigureDiscordCLientAsync(IConfigurationRoot configuration)
+        {
             // Create a new instance of DiscordSocketClient.
             var client = new DiscordSocketClient(new DiscordSocketConfig()
             {
@@ -51,22 +70,19 @@ namespace BundlesOfAmaze
             await client.StartAsync();
             await client.SetGameAsync(".amazecats help");
 
+            client.MessageReceived += ClientOnMessageReceived;
+
+            return client;
+        }
+
+        private async Task ClientOnMessageReceived(SocketMessage socketMessage)
+        {
             using (var scope = Container.BeginLifetimeScope())
             {
                 var commandService = scope.Resolve<ICommandService>();
-                var messageHandler = new MessageHandler(commandService, client);
+                var messageHandler = new MessageHandler(commandService, _client);
 
-                client.MessageReceived += messageHandler.HandleMessageAsync;
-
-                // Configure Hangfire
-                GlobalConfiguration.Configuration.UseSqlServerStorage(configuration.GetConnectionString("DataContext"));
-                RecurringJob.AddOrUpdate("Tick", () => Tick(), Cron.Minutely);
-
-                using (new BackgroundJobServer())
-                {
-                    // Block this task until the program is closed
-                    await Task.Delay(-1);
-                }
+                await messageHandler.HandleMessageAsync(socketMessage);
             }
         }
 
