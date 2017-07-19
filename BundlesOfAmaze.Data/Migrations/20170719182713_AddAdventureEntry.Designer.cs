@@ -8,9 +8,10 @@ using BundlesOfAmaze.Data;
 namespace BundlesOfAmaze.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20170719182713_AddAdventureEntry")]
+    partial class AddAdventureEntry
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.2")

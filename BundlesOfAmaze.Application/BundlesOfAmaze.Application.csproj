@@ -13,7 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Adventures\" />
     <Folder Include="Events\" />
     <Folder Include="Activities\" />
   </ItemGroup>

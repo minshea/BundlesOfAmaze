@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using BundlesOfAmaze.Application;
@@ -31,22 +32,29 @@ namespace BundlesOfAmaze
                 .AddEnvironmentVariables();
             var configuration = configBuilder.Build();
 
-            // Configure AutoFac
-            var builder = new ContainerBuilder();
-            AutofacConfig.Register(builder, configuration.GetConnectionString("DataContext"));
-            builder.RegisterInstance(configuration).As<IConfigurationRoot>().SingleInstance();
-            Container = builder.Build();
+            Console.WriteLine("Starting BundlesOfAmaze...");
+            Console.WriteLine("Connection string: {0}", configuration.GetConnectionString("DataContext"));
+            Console.WriteLine("Discord Token: {0}", configuration["Discord:Token"]);
 
-            // Seed data
-            using (var scope = Container.BeginLifetimeScope())
-            {
-                var dataContext = scope.Resolve<IDataContext>();
-                await dataContext.SeedAsync();
-            }
-
-            // Configure Discord
+            // Configure and connect to Discord
             using (_client = await ConfigureDiscordCLientAsync(configuration))
             {
+                // Configure AutoFac
+                var builder = new ContainerBuilder();
+                AutofacConfig.Register(builder, configuration.GetConnectionString("DataContext"));
+                builder.RegisterInstance(configuration).As<IConfigurationRoot>().SingleInstance();
+                builder.RegisterInstance(_client).As<IDiscordClient>().SingleInstance();
+                Container = builder.Build();
+
+                // Seed data
+                using (var scope = Container.BeginLifetimeScope())
+                {
+                    var dataContext = scope.Resolve<IDataContext>();
+                    Console.Write("Seeding database... ");
+                    await dataContext.SeedAsync();
+                    Console.WriteLine("OK");
+                }
+
                 // Configure Hangfire
                 GlobalConfiguration.Configuration.UseSqlServerStorage(configuration.GetConnectionString("DataContext"));
                 RecurringJob.AddOrUpdate("Tick", () => Tick(), Cron.Minutely);
@@ -61,6 +69,8 @@ namespace BundlesOfAmaze
 
         private async Task<DiscordSocketClient> ConfigureDiscordCLientAsync(IConfigurationRoot configuration)
         {
+            Console.Write("Connecting to Discord... ");
+
             // Create a new instance of DiscordSocketClient.
             var client = new DiscordSocketClient(new DiscordSocketConfig()
             {
@@ -74,11 +84,15 @@ namespace BundlesOfAmaze
             var logger = new Logger();
             client.Log += logger.ClientOnLogAsync;
 
+            var prefix = configuration["NETCORE_ENVIRONMENT"] == "production" ? Commands.Prefix : Commands.PrefixDev;
+
             await client.LoginAsync(TokenType.Bot, configuration["Discord:Token"]);
             await client.StartAsync();
-            await client.SetGameAsync(".amazecats help");
+            await client.SetGameAsync($"{prefix} help");
 
             client.MessageReceived += ClientOnMessageReceived;
+
+            Console.WriteLine("OK");
 
             return client;
         }

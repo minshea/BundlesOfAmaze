@@ -14,12 +14,15 @@ namespace BundlesOfAmaze.InversionOfControl
             builder.RegisterType<CatRepository>().As<ICatRepository>();
             builder.RegisterType<OwnerRepository>().As<IOwnerRepository>();
             builder.RegisterType<ItemRepository>().As<IItemRepository>();
+            builder.RegisterType<AdventureEntryRepository>().As<IAdventureEntryRepository>();
+            builder.RegisterType<AdventureRepository>().As<IAdventureRepository>();
 
             builder.RegisterType<CommandService>().As<ICommandService>();
             builder.RegisterType<CreateCommandService>().As<ICreateCommandService>();
             builder.RegisterType<HelpCommandService>().As<IHelpCommandService>();
             builder.RegisterType<GiveCommandService>().As<IGiveCommandService>();
             builder.RegisterType<ListCommandService>().As<IListCommandService>();
+            builder.RegisterType<GoCommandService>().As<IGoCommandService>();
         }
     }
 }

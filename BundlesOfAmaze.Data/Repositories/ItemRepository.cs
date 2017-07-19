@@ -20,5 +20,13 @@ namespace BundlesOfAmaze.Data
         {
             return await Queryable.FirstOrDefaultAsync(i => i.Name.Equals(itemName, StringComparison.OrdinalIgnoreCase));
         }
+
+        /// <summary>Finds the item by item reference asynchronous.</summary>
+        /// <param name="itemRef">The item reference.</param>
+        /// <returns>A <see cref="Item"/> instance.</returns>
+        public async Task<Item> FindByItemRefAsync(ItemRef itemRef)
+        {
+            return await Queryable.FirstOrDefaultAsync(i => i.ItemRef == itemRef);
+        }
     }
 }

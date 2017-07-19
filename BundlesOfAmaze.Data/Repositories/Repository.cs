@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,12 +42,34 @@ namespace BundlesOfAmaze.Data
             return await Queryable.ToListAsync();
         }
 
-        /// <summary>Adds the entity asynchronous.</summary>
-        /// <param name="entity"></param>
-        /// <returns>A <see cref="Task"/> instance.</returns>
-        public async Task AddAsync(T entity)
+        /// <summary>Finds the matching asynchronous.</summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>A <see cref="T"/> instance.</returns>
+        public async Task<T> FindMatchingAsync(Expression<Func<T, bool>> expression)
         {
-            await DbSet.AddAsync(entity);
+            return await Queryable.Where(expression).FirstOrDefaultAsync();
+        }
+
+        /// <summary>Finds all matching asynchronous.</summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>A <see cref="IEnumerable{T}"/> instance.</returns>
+        public async Task<IEnumerable<T>> FindAllMatchingAsync(Expression<Func<T, bool>> expression)
+        {
+            return await Queryable.Where(expression).ToListAsync();
+        }
+
+        /// <summary>Adds the entity.</summary>
+        /// <param name="entity"></param>
+        public void Add(T entity)
+        {
+            DbSet.Add(entity);
+        }
+
+        /// <summary>Adds the entity.</summary>
+        /// <param name="entity"></param>
+        public void Remove(T entity)
+        {
+            DbSet.Remove(entity);
         }
 
         /// <summary>Saves the changes asynchronous.</summary>

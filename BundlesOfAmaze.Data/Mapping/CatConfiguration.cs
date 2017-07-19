@@ -10,7 +10,7 @@ namespace BundlesOfAmaze.Data
             builder.ToTable(typeof(Cat).Name);
             builder.HasKey(i => i.Id);
 
-            builder.HasOne(i => i.Stats).WithOne(i => i.Cat).HasForeignKey<Stats>(i => i.CatId);
+            builder.HasOne(i => i.Stats).WithOne(i => i.Cat).HasForeignKey<CatStats>(i => i.CatId);
         }
     }
 }

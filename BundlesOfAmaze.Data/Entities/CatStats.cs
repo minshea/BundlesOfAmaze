@@ -2,11 +2,11 @@
 
 namespace BundlesOfAmaze.Data
 {
-    public class Stats : Entity
+    public class CatStats : Entity
     {
         #region EF Mapping
 
-        public long CatId { get; set; }
+        public long CatId { get; private set; }
 
         public virtual Cat Cat { get; private set; }
 
@@ -26,15 +26,8 @@ namespace BundlesOfAmaze.Data
 
         public int High { get; set; }
 
-        protected Stats()
+        public CatStats()
         {
-        }
-
-        public Stats(int hunger, int thirst)
-            : this()
-        {
-            Hunger = hunger;
-            Thirst = thirst;
         }
 
         public void NeedsTick()

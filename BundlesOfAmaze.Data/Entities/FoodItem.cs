@@ -10,8 +10,8 @@ namespace BundlesOfAmaze.Data
         {
         }
 
-        public FoodItem(ItemType itemType, string name, string label, string description, int foodValue)
-            : base(itemType, name, label, description)
+        public FoodItem(ItemType itemType, ItemRef itemRef, string name, string description, int foodValue)
+            : base(itemType, itemRef, name, description)
         {
             FoodValue = foodValue;
         }

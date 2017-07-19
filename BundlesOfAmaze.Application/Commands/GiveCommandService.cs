@@ -1,6 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using BundlesOfAmaze.Data;
+using BundlesOfAmaze.Shared;
 
 namespace BundlesOfAmaze.Application
 {
@@ -25,24 +25,24 @@ namespace BundlesOfAmaze.Application
                 return new ResultMessage($"An item with the name '{itemName}' does not exist, sorry");
             }
 
-            var inventoryItem = owner.GetItem(item.Id);
+            var inventoryItem = owner.GetItem(item.ItemRef);
             if (inventoryItem == null)
             {
-                return new ResultMessage($"You do not have any {item.Label}");
+                return new ResultMessage($"You do not have any {item.Name}");
             }
 
             var cat = await _catRepository.FindByOwnerAsync(owner.Id);
             if (cat == null)
             {
-                return new ResultMessage("You do not own a cat");
+                return new ResultMessage(Messages.CatNotOwned);
             }
 
-            if (inventoryItem.Quantity < 1)
+            var result = inventoryItem.DecreaseQuantity(1);
+            if (!result)
             {
-                return new ResultMessage($"You do not have enough {item.Label}");
+                return new ResultMessage($"You do not have enough {item.Name}");
             }
 
-            inventoryItem.DecreaseQuantity(1);
             cat.GiveItem(item, 1);
 
             await _catRepository.SaveChangesAsync();
@@ -51,17 +51,17 @@ namespace BundlesOfAmaze.Application
             switch (item.ItemType)
             {
                 case ItemType.Food:
-                    message = $"{cat.Name} happily noms on the {item.Label}";
+                    message = $"{cat.Name} happily noms on the {item.Name}";
                     break;
 
                 case ItemType.Drink:
-                    message = $"{cat.Name} happily drinks the {item.Label}";
+                    message = $"{cat.Name} happily drinks the {item.Name}";
                     break;
 
                 case ItemType.Currency:
                 case ItemType.Consumable:
                 case ItemType.Equipment:
-                    message = $"{cat.Name} takes the {item.Label}";
+                    message = $"{cat.Name} takes the {item.Name}";
                     break;
             }
 

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BundlesOfAmaze.Data
+﻿namespace BundlesOfAmaze.Data
 {
     public class OwnerInventoryItem : Entity
     {
@@ -12,7 +10,7 @@ namespace BundlesOfAmaze.Data
 
         #endregion EF Mapping
 
-        public long ItemId { get; private set; }
+        public ItemRef ItemRef { get; private set; }
 
         public int Quantity { get; private set; }
 
@@ -20,20 +18,27 @@ namespace BundlesOfAmaze.Data
         {
         }
 
-        public OwnerInventoryItem(int itemId, int quantity)
+        public OwnerInventoryItem(ItemRef itemRef, int quantity)
             : this()
         {
-            ItemId = itemId;
+            ItemRef = itemRef;
             Quantity = quantity;
         }
 
-        public void DecreaseQuantity(int amount)
+        public bool DecreaseQuantity(int quantity)
         {
-            Quantity -= amount;
-            if (Quantity < 0)
+            if (Quantity - quantity < 0)
             {
-                throw new InvalidOperationException("Amount can not be lower than 0");
+                return false;
             }
+
+            Quantity -= quantity;
+            return true;
+        }
+
+        public void AddQuantity(int quantity)
+        {
+            Quantity += quantity;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using BundlesOfAmaze.Data;
 using Discord;
 
@@ -6,7 +7,7 @@ namespace BundlesOfAmaze.Application
 {
     public static class CatSheet
     {
-        public static Embed GetSheet(Cat cat)
+        public static Embed GetSheet(Cat cat, string adventure = null, DateTimeOffset? adventureEnd = null)
         {
             var embedBuilder = new EmbedBuilder
             {
@@ -15,11 +16,24 @@ namespace BundlesOfAmaze.Application
 
             var ageField = new EmbedFieldBuilder
             {
-                IsInline = false,
+                IsInline = adventure != null,
                 Name = "Age",
                 Value = (int)((DateTimeOffset.UtcNow - cat.DateOfBirth).TotalDays / 7) + " weeks"
             };
             embedBuilder.AddField(ageField);
+
+            if (adventure != null && adventureEnd.HasValue)
+            {
+                var remaining = adventureEnd.Value - DateTimeOffset.UtcNow;
+
+                var adventureField = new EmbedFieldBuilder
+                {
+                    IsInline = false,
+                    Name = "Current adventure",
+                    Value = $"{adventure} - {remaining.ToString("HH:mm:ss", CultureInfo.InvariantCulture)} remaining"
+                };
+                embedBuilder.AddField(adventureField);
+            }
 
             var hungerField = new EmbedFieldBuilder
             {

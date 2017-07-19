@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using BundlesOfAmaze.Data.Mapping;
 using Microsoft.EntityFrameworkCore;
 
 namespace BundlesOfAmaze.Data
@@ -36,7 +37,8 @@ namespace BundlesOfAmaze.Data
             modelBuilder.AddConfiguration(new OwnerConfiguration());
             modelBuilder.AddConfiguration(new OwnerInventoryItemConfiguration());
             modelBuilder.AddConfiguration(new CatConfiguration());
-            modelBuilder.AddConfiguration(new StatsConfiguration());
+            modelBuilder.AddConfiguration(new CatStatsConfiguration());
+            modelBuilder.AddConfiguration(new AdventureEntryConfiguration());
             modelBuilder.AddConfiguration(new ItemConfiguration());
             modelBuilder.AddConfiguration(new FoodItemConfiguration());
         }
@@ -53,11 +55,11 @@ namespace BundlesOfAmaze.Data
         {
             var sourceItems = new List<Item>
             {
-                new FoodItem(ItemType.Drink, "milk", "Milk", "Just some regular milk", 7200),
-                new FoodItem(ItemType.Drink, "water", "Water", "Just some regular water", 3600),
-                new FoodItem(ItemType.Food, "tuna", "Tuna", "Tuna fish!", 7200),
-                new FoodItem(ItemType.Food, "goldfish", "Goldfish", "Made from 24 carat gold! Shiny!", 14400),
-                new Item(ItemType.Currency, "gold", "Goldfish", "Made from 24 carat gold! Shiny!")
+                new FoodItem(ItemType.Drink, ItemRef.Milk, "Milk", "Just some regular milk", 7200),
+                new FoodItem(ItemType.Drink, ItemRef.Water, "Water", "Just some regular water", 3600),
+                new FoodItem(ItemType.Food, ItemRef.Tuna, "Tuna", "Tuna fish!", 7200),
+                new FoodItem(ItemType.Food, ItemRef.Goldfish, "Goldfish", "Made with 24 carat gold! Shiny!", 14400),
+                new Item(ItemType.Currency, ItemRef.Credit, "Trenni", "Silver coin")
             };
 
             Item item;

@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BundlesOfAmaze.Data
 {
-    public class StatsConfiguration : EntityTypeConfiguration<Stats>
+    public class CatStatsConfiguration : EntityTypeConfiguration<CatStats>
     {
-        public override void Map(EntityTypeBuilder<Stats> builder)
+        public override void Map(EntityTypeBuilder<CatStats> builder)
         {
-            builder.ToTable(typeof(Stats).Name);
+            builder.ToTable(typeof(CatStats).Name);
             builder.HasKey(i => i.Id);
         }
     }

@@ -6,5 +6,4 @@ services:
     build:
       context: ./BundlesOfAmaze
       dockerfile: Dockerfile
-    extra_hosts:  
-      - "hyperion:192.168.0.11"
+

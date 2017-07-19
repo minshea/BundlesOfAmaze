@@ -14,9 +14,11 @@ namespace BundlesOfAmaze.Data
 
         public DateTimeOffset DateOfBirth { get; private set; }
 
-        public Stats Stats { get; private set; }
+        public CatStats Stats { get; private set; }
 
-        public string Addressing => Gender == Gender.Male ? "his" : "her";
+        public string Posessive => Gender == Gender.Male ? "his" : "her";
+
+        public string Pronoun => Gender == Gender.Male ? "he" : "she";
 
         [NotMapped]
         public int HungerCap { get; private set; }
@@ -40,13 +42,27 @@ namespace BundlesOfAmaze.Data
             Gender = gender;
 
             DateOfBirth = DateTimeOffset.UtcNow;
-            Stats = new Stats(HungerCap / 2, ThirstCap / 2);
+            Stats = new CatStats()
+            {
+                Hunger = HungerCap / 2,
+                Thirst = ThirstCap / 2
+            };
         }
 
         public void Tick()
         {
-            Console.WriteLine($"Handle {Name}");
             Stats.NeedsTick();
+        }
+
+        public void ApplyStatModifiers(CatStats adventureStatGain)
+        {
+            Stats.Hunger = (Stats.Hunger + adventureStatGain.Hunger).Clamp(0, HungerCap);
+            Stats.Thirst = (Stats.Thirst + adventureStatGain.Thirst).Clamp(0, ThirstCap);
+            Stats.Kind = (Stats.Kind + adventureStatGain.Kind).Clamp(0, int.MaxValue);
+            Stats.Lazy = (Stats.Lazy + adventureStatGain.Lazy).Clamp(0, int.MaxValue);
+            Stats.Resourceful = (Stats.Resourceful + adventureStatGain.Resourceful).Clamp(0, int.MaxValue);
+            Stats.Outgoing = (Stats.Outgoing + adventureStatGain.Outgoing).Clamp(0, int.MaxValue);
+            Stats.High = (Stats.High + adventureStatGain.High).Clamp(0, int.MaxValue);
         }
 
         public void GiveItem(Item item, int quantity)

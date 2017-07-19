@@ -9,8 +9,6 @@ namespace BundlesOfAmaze.Data
 
         public string Name { get; private set; }
 
-        ////public Cat Cat { get; private set; }
-
         public Collection<OwnerInventoryItem> InventoryItems { get; private set; }
 
         protected Owner()
@@ -23,14 +21,24 @@ namespace BundlesOfAmaze.Data
         {
             AuthorId = authorId;
             Name = name;
-            ////Cat = cat;
-
-            ////InventoryItems.Add(new OwnerInventoryItem());
         }
 
-        public OwnerInventoryItem GetItem(long itemId)
+        public OwnerInventoryItem GetItem(ItemRef itemRef)
         {
-            return InventoryItems.FirstOrDefault(i => i.ItemId == itemId);
+            return InventoryItems.FirstOrDefault(i => i.ItemRef == itemRef);
+        }
+
+        public void GiveItem(ItemRef itemRef, int quantity)
+        {
+            var existing = InventoryItems.FirstOrDefault(i => i.ItemRef == itemRef);
+            if (existing == null)
+            {
+                InventoryItems.Add(new OwnerInventoryItem(itemRef, quantity));
+            }
+            else
+            {
+                existing.AddQuantity(quantity);
+            }
         }
     }
 }
