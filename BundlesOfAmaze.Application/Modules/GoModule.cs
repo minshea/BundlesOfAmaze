@@ -2,37 +2,48 @@
 using System.Threading.Tasks;
 using BundlesOfAmaze.Data;
 using BundlesOfAmaze.Shared;
+using Discord.Commands;
 
 namespace BundlesOfAmaze.Application
 {
-    public class GoCommandService : IGoCommandService
+    [Name("Go")]
+    public class GoModule : ModuleBase
     {
+        private readonly ICurrentOwner _currentOwner;
         private readonly IAdventureEntryRepository _adventureEntryRepository;
         private readonly ICatRepository _catRepository;
 
-        public GoCommandService(IAdventureEntryRepository adventureEntryRepository, ICatRepository catRepository)
+        public GoModule(ICurrentOwner currentOwner, IAdventureEntryRepository adventureEntryRepository,
+            ICatRepository catRepository)
         {
+            _currentOwner = currentOwner;
             _adventureEntryRepository = adventureEntryRepository;
             _catRepository = catRepository;
         }
 
-        public async Task<ResultMessage> HandleAsync(Owner owner, string rawDestinationName)
+        [Command("go")]
+        [Summary("Goes somewhere. Use 'help go' for more information")]
+        [Remarks("Usage: go [destination name]\nCommand to send your cat off on an adventure")]
+        public async Task HandleAsync(string rawDestinationName)
         {
             if (string.IsNullOrWhiteSpace(rawDestinationName))
             {
-                return new ResultMessage(Messages.InvalidCommand);
+                await ReplyAsync(Messages.InvalidCommand);
+                return;
             }
 
-            var cat = await _catRepository.FindByOwnerAsync(owner.Id);
+            var cat = await _catRepository.FindByOwnerAsync(_currentOwner.Owner.Id);
             if (cat == null)
             {
-                return new ResultMessage(Messages.CatNotOwned);
+                await ReplyAsync(Messages.CatNotOwned);
+                return;
             }
 
             var existingAdventureEntry = await _adventureEntryRepository.FindByCatIdAsync(cat.Id);
             if (existingAdventureEntry != null)
             {
-                return new ResultMessage(Messages.AdventureNotNull);
+                await ReplyAsync(Messages.AdventureNotNull);
+                return;
             }
 
             var destinationName = rawDestinationName.Trim().ToLowerInvariant();
@@ -43,10 +54,12 @@ namespace BundlesOfAmaze.Application
                     await RegisterAdventureAsync(cat, adventure);
 
                     Console.WriteLine($"Adding adventure {adventure.AdventureRef} for cat {cat.Id}");
-                    return new ResultMessage($"{cat.Name} embarks on {adventure.Name}. {cat.Pronoun} will return in {adventure.Duration.TotalMinutes} minutes.");
+                    await ReplyAsync($"{cat.Name} embarks on {adventure.Name}. {cat.Pronoun} will return in {adventure.Duration.TotalMinutes} minutes.");
+                    return;
 
                 default:
-                    return new ResultMessage($"There is no adventure with the name '{destinationName}'");
+                    await ReplyAsync($"There is no adventure with the name '{destinationName}'");
+                    return;
             }
         }
 

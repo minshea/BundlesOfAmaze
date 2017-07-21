@@ -8,6 +8,8 @@ namespace BundlesOfAmaze
     {
         public async Task ClientOnLogAsync(LogMessage arg)
         {
+            // TODO: implement some form of logging
+
             if (arg.Exception != null)
             {
                 Debug.Write("");

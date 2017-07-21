@@ -12,6 +12,6 @@
         public const string List = "list";
         public const string ListInventory = "inventory";
         public const string ListAdventures = "adventures";
-        public const string ListActivities = "activities"; // lick other cat, etc
+        public const string ListActivities = "activities";
     }
 }

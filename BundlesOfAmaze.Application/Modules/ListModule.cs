@@ -1,29 +1,49 @@
-﻿using System.Globalization;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using BundlesOfAmaze.Data;
 using Discord;
+using Discord.Commands;
 
 namespace BundlesOfAmaze.Application
 {
-    public class ListCommandService : IListCommandService
+    [Name("List")]
+    public class ListModule : ModuleBase
     {
+        private readonly ICurrentOwner _currentOwner;
         private readonly IItemRepository _itemRepository;
 
-        public ListCommandService(IItemRepository itemRepository)
+        public ListModule(ICurrentOwner currentOwner, IItemRepository itemRepository)
         {
+            _currentOwner = currentOwner;
             _itemRepository = itemRepository;
         }
 
-        public async Task<ResultMessage> HandleAsync(Owner owner, string commandPart)
+        [Command("list"), Alias("l")]
+        [Summary("Lists possible activities. Use 'help list' for more information")]
+        [Remarks("Usage: list")]
+        public async Task HandleAsync()
         {
             ////.amazecats list
+
+            var message = "\n**Lists**\n";
+            message += "inventory - Your inventory\n";
+            message += "adventures - Available adventures\n";
+            message += "jobs - Available jobs\n";
+
+            await ReplyAsync(message);
+        }
+
+        [Command("list"), Alias("l")]
+        [Summary("Lists possible activities. Use 'help list' for more information")]
+        [Remarks("Usage: list [name]\nCommand to list activities or adventures your cat can embark on")]
+        public async Task HandleAsync(string list)
+        {
             ////.amazecats list adventures
 
             var message = string.Empty;
             var embed = default(Embed);
 
-            switch (commandPart)
+            switch (list)
             {
                 case Commands.ListAdventures:
                     message = "**Available adventures**\n\n";
@@ -37,13 +57,13 @@ namespace BundlesOfAmaze.Application
 
                 case Commands.ListInventory:
 
-                    var itemRefs = owner.InventoryItems.Select(i => i.ItemRef).ToList();
+                    var itemRefs = _currentOwner.Owner.InventoryItems.Select(i => i.ItemRef).ToList();
                     var items = await _itemRepository.FindAllMatchingAsync(i => itemRefs.Contains(i.ItemRef));
 
                     var embedBuilder = new EmbedBuilder();
                     foreach (var item in items.OrderBy(i => i.Name))
                     {
-                        var quantity = owner.InventoryItems.Single(i => i.ItemRef == item.ItemRef).Quantity;
+                        var quantity = _currentOwner.Owner.InventoryItems.Single(i => i.ItemRef == item.ItemRef).Quantity;
                         var amount = quantity > 0 ? quantity.ToString() : "none";
 
                         var itemField = new EmbedFieldBuilder
@@ -67,7 +87,7 @@ namespace BundlesOfAmaze.Application
                     break;
             }
 
-            return new ResultMessage(message, embed);
+            await ReplyAsync(message, embed: embed);
         }
     }
 }

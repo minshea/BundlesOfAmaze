@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="1.0.1" />
+    <PackageReference Include="Discord.Net.Commands" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -13,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Commands\" />
     <Folder Include="Events\" />
     <Folder Include="Activities\" />
   </ItemGroup>

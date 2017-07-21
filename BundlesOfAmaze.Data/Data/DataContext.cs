@@ -45,7 +45,6 @@ namespace BundlesOfAmaze.Data
 
         public async Task SeedAsync()
         {
-            await Database.EnsureCreatedAsync();
             await Database.MigrateAsync();
 
             await SeedItemsAsync();

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using BundlesOfAmaze.Application;
 using BundlesOfAmaze.Data;
 using BundlesOfAmaze.InversionOfControl;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Hangfire;
 using Microsoft.Extensions.Configuration;
@@ -15,8 +17,11 @@ namespace BundlesOfAmaze
 {
     internal class Program
     {
-        public static IContainer Container;
+        private AutofacServiceProvider _serviceProvider;
+        private IContainer _container;
         private DiscordSocketClient _client;
+        private CommandService _commandService;
+        private IConfigurationRoot _configuration;
 
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
@@ -24,39 +29,46 @@ namespace BundlesOfAmaze
         {
             var environmentName = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
 
+            Console.WriteLine($"Starting BundlesOfAmaze in {environmentName} mode...");
+
             // Load configuration
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", true, true)
                 .AddJsonFile($"appsettings.{environmentName}.json", true, true)
                 .AddEnvironmentVariables();
-            var configuration = configBuilder.Build();
+            _configuration = configBuilder.Build();
 
-            Console.WriteLine("Starting BundlesOfAmaze...");
-            Console.WriteLine("Connection string: {0}", configuration.GetConnectionString("DataContext"));
-            Console.WriteLine("Discord Token: {0}", configuration["Discord:Token"]);
+            Console.WriteLine("Connection string: {0}", _configuration.GetConnectionString("DataContext"));
+            Console.WriteLine("Discord Token: {0}", _configuration["Discord:Token"]);
+
+            // Configure command service
+            _commandService = new CommandService();
+            await _commandService.AddModulesAsync(typeof(HelpModule).GetTypeInfo().Assembly);
 
             // Configure and connect to Discord
-            using (_client = await ConfigureDiscordCLientAsync(configuration))
+            using (_client = await ConfigureDiscordCLientAsync(_configuration))
             {
                 // Configure AutoFac
                 var builder = new ContainerBuilder();
-                AutofacConfig.Register(builder, configuration.GetConnectionString("DataContext"));
-                builder.RegisterInstance(configuration).As<IConfigurationRoot>().SingleInstance();
+                AutofacConfig.Register(builder, _configuration.GetConnectionString("DataContext"));
+                builder.RegisterInstance(_configuration).As<IConfigurationRoot>().SingleInstance();
                 builder.RegisterInstance(_client).As<IDiscordClient>().SingleInstance();
-                Container = builder.Build();
+                builder.RegisterInstance(_commandService).As<CommandService>().SingleInstance();
+                _container = builder.Build();
+                _serviceProvider = new AutofacServiceProvider(_container);
 
                 // Seed data
-                using (var scope = Container.BeginLifetimeScope())
+                using (var scope = _container.BeginLifetimeScope())
                 {
-                    var dataContext = scope.Resolve<IDataContext>();
                     Console.Write("Seeding database... ");
+                    var dataContext = scope.Resolve<IDataContext>();
                     await dataContext.SeedAsync();
                     Console.WriteLine("OK");
                 }
 
                 // Configure Hangfire
-                GlobalConfiguration.Configuration.UseSqlServerStorage(configuration.GetConnectionString("DataContext"));
+                GlobalConfiguration.Configuration.UseSqlServerStorage(_configuration.GetConnectionString("DataContext"));
                 RecurringJob.AddOrUpdate("Tick", () => Tick(), Cron.Minutely);
 
                 using (new BackgroundJobServer())
@@ -83,38 +95,77 @@ namespace BundlesOfAmaze
 
             var logger = new Logger();
             client.Log += logger.ClientOnLogAsync;
-
-            var prefix = configuration["NETCORE_ENVIRONMENT"] == "production" ? Commands.Prefix : Commands.PrefixDev;
+            client.MessageReceived += HandleCommandAsync;
 
             await client.LoginAsync(TokenType.Bot, configuration["Discord:Token"]);
             await client.StartAsync();
-            await client.SetGameAsync($"{prefix} help");
 
-            client.MessageReceived += ClientOnMessageReceived;
+            var prefix = GetPrefix();
+            await client.SetGameAsync($"{prefix} help");
 
             Console.WriteLine("OK");
 
             return client;
         }
 
-        private async Task ClientOnMessageReceived(SocketMessage socketMessage)
+        private async Task HandleCommandAsync(SocketMessage s)
         {
-            using (var scope = Container.BeginLifetimeScope())
+            // Don't process the command if it was a System Message
+            var message = s as SocketUserMessage;
+            if (message == null)
             {
-                var commandService = scope.Resolve<ICommandService>();
-                var messageHandler = new MessageHandler(commandService, _client);
+                return;
+            }
 
-                await messageHandler.HandleMessageAsync(socketMessage);
+            var argPos = 0;
+            var prefix = GetPrefix();
+
+            // Check if the message has either a string or mention prefix
+            if (message.HasStringPrefix(prefix, ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+            {
+                using (_container.BeginLifetimeScope())
+                {
+                    // Initialize the owner service
+                    var authorId = message.Author.Id.ToString();
+                    var owner = await _container.Resolve<IOwnerRepository>().FindByAuthorIdAsync(authorId);
+                    var ownerService = _container.Resolve<IOwnerService>();
+                    ownerService.SetCurrentOwner(owner);
+
+                    var context = new SocketCommandContext(_client, message);
+
+                    IResult result;
+                    if (message.Content.Trim() == prefix)
+                    {
+                        // Not sure how to handle a command with only the prefix yet
+                        result = await _commandService.ExecuteAsync(context, "overview", _serviceProvider);
+                    }
+                    else
+                    {
+                        // Try and execute a command with the given context
+                        result = await _commandService.ExecuteAsync(context, argPos + 1, _serviceProvider);
+                    }
+
+                    // If execution failed, reply with the error message
+                    if (!result.IsSuccess)
+                    {
+                        await context.Channel.SendMessageAsync(result.ToString());
+                    }
+                }
             }
         }
 
         public async Task Tick()
         {
-            using (var scope = Container.BeginLifetimeScope())
+            using (var scope = _container.BeginLifetimeScope())
             {
                 var backgroundService = scope.Resolve<IBackgroundService>();
                 await backgroundService.HandleTickAsync();
             }
+        }
+
+        private string GetPrefix()
+        {
+            return _configuration["NETCORE_ENVIRONMENT"] == "production" ? Commands.Prefix : Commands.PrefixDev;
         }
     }
 }

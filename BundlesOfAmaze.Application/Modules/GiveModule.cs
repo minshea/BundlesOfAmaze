@@ -1,46 +1,57 @@
 ﻿using System.Threading.Tasks;
 using BundlesOfAmaze.Data;
 using BundlesOfAmaze.Shared;
+using Discord.Commands;
 
 namespace BundlesOfAmaze.Application
 {
-    public class GiveCommandService : IGiveCommandService
+    [Name("Give")]
+    public class GiveModule : ModuleBase
     {
+        private readonly ICurrentOwner _currentOwner;
         private readonly ICatRepository _catRepository;
         private readonly IItemRepository _itemRepository;
 
-        public GiveCommandService(ICatRepository catRepository, IItemRepository itemRepository)
+        public GiveModule(ICurrentOwner currentOwner, ICatRepository catRepository, IItemRepository itemRepository)
         {
+            _currentOwner = currentOwner;
             _catRepository = catRepository;
             _itemRepository = itemRepository;
         }
 
-        public async Task<ResultMessage> HandleAsync(Owner owner, string itemName)
+        [Command("give"), Alias("g")]
+        [Summary("Gives an item. Use 'help give' for more information")]
+        [Remarks("Usage: give [item name]\nCommand to feed or give an item to your cat\nex. give tuna\n")]
+        public async Task HandleAsync(string itemName)
         {
             ////.amazecats give itemname
 
             var item = await _itemRepository.FindByNameAsync(itemName);
             if (item == null)
             {
-                return new ResultMessage($"An item with the name '{itemName}' does not exist, sorry");
+                await ReplyAsync($"An item with the name '{itemName}' does not exist, sorry");
+                return;
             }
 
-            var inventoryItem = owner.GetItem(item.ItemRef);
+            var inventoryItem = _currentOwner.Owner.GetItem(item.ItemRef);
             if (inventoryItem == null)
             {
-                return new ResultMessage($"You do not have any {item.Name}");
+                await ReplyAsync($"You do not have any {item.Name}");
+                return;
             }
 
-            var cat = await _catRepository.FindByOwnerAsync(owner.Id);
+            var cat = await _catRepository.FindByOwnerAsync(_currentOwner.Owner.Id);
             if (cat == null)
             {
-                return new ResultMessage(Messages.CatNotOwned);
+                await ReplyAsync(Messages.CatNotOwned);
+                return;
             }
 
             var result = inventoryItem.DecreaseQuantity(1);
             if (!result)
             {
-                return new ResultMessage($"You do not have enough {item.Name}");
+                await ReplyAsync($"You do not have enough {item.Name}");
+                return;
             }
 
             cat.GiveItem(item, 1);
@@ -65,7 +76,7 @@ namespace BundlesOfAmaze.Application
                     break;
             }
 
-            return new ResultMessage(message, CatSheet.GetSheet(cat));
+            await ReplyAsync(message, embed: CatSheet.GetSheet(cat));
         }
     }
 }

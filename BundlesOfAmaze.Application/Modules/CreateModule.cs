@@ -2,28 +2,36 @@
 using System.Threading.Tasks;
 using BundlesOfAmaze.Data;
 using BundlesOfAmaze.Shared;
-using Discord.WebSocket;
+using Discord;
+using Discord.Commands;
 
 namespace BundlesOfAmaze.Application
 {
-    public class CreateCommandService : ICreateCommandService
+    [Name("Create")]
+    public class CreateModule : ModuleBase
     {
+        private readonly ICurrentOwner _currentOwner;
         private readonly ICatRepository _repository;
         private readonly IOwnerRepository _ownerRepository;
 
-        public CreateCommandService(ICatRepository repository, IOwnerRepository ownerRepository)
+        public CreateModule(ICurrentOwner currentOwner, ICatRepository repository, IOwnerRepository ownerRepository)
         {
+            _currentOwner = currentOwner;
             _repository = repository;
             _ownerRepository = ownerRepository;
         }
 
-        public async Task<ResultMessage> HandleAsync(Owner owner, string rawName, string rawGender)
+        [Command("create")]
+        [Summary("Creates a new cat. Use 'help create' for more information")]
+        [Remarks("Usage: create [name] [gender:male|female]\nCommand to create a new cat\nex. create Kitty female")]
+        public async Task HandleAsync(string rawName, string rawGender)
         {
             ////.amazecats create Name Male
 
             if (string.IsNullOrWhiteSpace(rawName) || string.IsNullOrWhiteSpace(rawGender))
             {
-                return new ResultMessage(Messages.InvalidCommand);
+                await ReplyAsync(Messages.InvalidCommand);
+                return;
             }
 
             var name = rawName.Trim();
@@ -32,13 +40,18 @@ namespace BundlesOfAmaze.Application
             var existingCat = await _repository.FindByNameAsync(name);
             if (existingCat != null)
             {
-                return new ResultMessage($"Error: A cat with the name '{name}' already exists");
+                await ReplyAsync($"Error: A cat with the name '{name}' already exists");
+                return;
             }
 
             if (!Enum.TryParse(rawGender.Trim(), true, out Gender gender) || gender == Gender.None)
             {
-                return new ResultMessage($"Error: Valid genders are '{Gender.Male}' and '{Gender.Female}'");
+                await ReplyAsync($"Error: Valid genders are '{Gender.Male}' and '{Gender.Female}'");
+                return;
             }
+
+            // If there is no owner yet, generate one
+            var owner = _currentOwner.Owner ?? await CreateOwnerAsync(Context.Message.Author);
 
             // Generate the new cat
             var newCat = new Cat(owner.Id, name, gender);
@@ -48,14 +61,14 @@ namespace BundlesOfAmaze.Application
             await _repository.SaveChangesAsync();
 
             var catSheet = CatSheet.GetSheet(newCat);
-            var result = $"{newCat.Name} happily meets {newCat.Posessive} new master\n";
+            var message = $"{newCat.Name} happily meets {newCat.Posessive} new master\n";
 
-            return new ResultMessage(result, catSheet);
+            await ReplyAsync(message, embed: catSheet);
         }
 
-        public async Task<Owner> CreateOwnerAsync(SocketUserMessage msg)
+        private async Task<Owner> CreateOwnerAsync(IUser user)
         {
-            var owner = new Owner(msg.Author.Id.ToString(), msg.Author.Username);
+            var owner = new Owner(user.Id.ToString(), user.Username);
 
             // Give some initial items for the new owner to start out with
             owner.GiveItem(ItemRef.Water, 10);
