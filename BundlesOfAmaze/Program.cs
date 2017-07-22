@@ -42,6 +42,7 @@ namespace BundlesOfAmaze
                 .AddEnvironmentVariables();
             _configuration = configBuilder.Build();
 
+            Console.WriteLine("Build number: {0}", _configuration["BuildNumber"]);
             Console.WriteLine("Connection string: {0}", _configuration.GetConnectionString("DataContext"));
             Console.WriteLine("Discord Token: {0}", _configuration["Discord:Token"]);
 

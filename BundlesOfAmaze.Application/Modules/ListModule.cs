@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using BundlesOfAmaze.Data;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Configuration;
 
 namespace BundlesOfAmaze.Application
 {
@@ -10,11 +11,13 @@ namespace BundlesOfAmaze.Application
     public class ListModule : ModuleBase
     {
         private readonly ICurrentOwner _currentOwner;
+        private readonly IConfigurationRoot _configuration;
         private readonly IItemRepository _itemRepository;
 
-        public ListModule(ICurrentOwner currentOwner, IItemRepository itemRepository)
+        public ListModule(ICurrentOwner currentOwner, IConfigurationRoot configuration, IItemRepository itemRepository)
         {
             _currentOwner = currentOwner;
+            _configuration = configuration;
             _itemRepository = itemRepository;
         }
 
@@ -60,22 +63,25 @@ namespace BundlesOfAmaze.Application
                     var itemRefs = _currentOwner.Owner.InventoryItems.Select(i => i.ItemRef).ToList();
                     var items = await _itemRepository.FindAllMatchingAsync(i => itemRefs.Contains(i.ItemRef));
 
-                    var embedBuilder = new EmbedBuilder();
+                    var embedBuilder = new EmbedBuilder
+                    {
+                        Color = new Color(226, 193, 5)
+                    };
+
                     foreach (var item in items.OrderBy(i => i.Name))
                     {
                         var quantity = _currentOwner.Owner.InventoryItems.Single(i => i.ItemRef == item.ItemRef).Quantity;
-                        var amount = quantity > 0 ? quantity.ToString() : "none";
 
                         var itemField = new EmbedFieldBuilder
                         {
-                            IsInline = false,
-                            Name = item.Name,
-                            Value = $"{item.Description}\nAmount: {amount}"
+                            IsInline = true,
+                            Name = $"{quantity}x {item.Name}",
+                            Value = item.Description
                         };
                         embedBuilder.AddField(itemField);
                     }
 
-                    message = "\n**Inventory**\n";
+                    message = $"**{_currentOwner.Owner.Name}'s inventory**\n";
                     embed = embedBuilder.Build();
                     break;
 
@@ -88,6 +94,14 @@ namespace BundlesOfAmaze.Application
             }
 
             await ReplyAsync(message, embed: embed);
+        }
+
+        [Command("version")]
+        [Summary("Current application version")]
+        [Remarks("Usage: version")]
+        public async Task HandleVersionAsync()
+        {
+            await ReplyAsync("Version " + _configuration["BuildNumber"]);
         }
     }
 }

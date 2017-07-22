@@ -3,7 +3,7 @@
     public class Commands
     {
         public const string Prefix = ".amazecats";
-        public const string PrefixDev = ".amazecatsdev";
+        public const string PrefixDev = ".devamazecats";
         public const string Help = "help";
         public const string Create = "create";
         public const string Give = "give";
