@@ -11,6 +11,9 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Hangfire;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 
 namespace BundlesOfAmaze
@@ -18,7 +21,7 @@ namespace BundlesOfAmaze
     internal class Program
     {
         private AutofacServiceProvider _serviceProvider;
-        private IContainer _container;
+        private static IContainer _container;
         private DiscordSocketClient _client;
         private CommandService _commandService;
         private IConfigurationRoot _configuration;
@@ -42,8 +45,16 @@ namespace BundlesOfAmaze
             Console.WriteLine("Connection string: {0}", _configuration.GetConnectionString("DataContext"));
             Console.WriteLine("Discord Token: {0}", _configuration["Discord:Token"]);
 
+            // Configure application insights
+            TelemetryConfiguration.Active.InstrumentationKey = _configuration["ApplicationInsights:InstrumentationKey"];
+            if (environmentName != "production")
+            {
+                TelemetryConfiguration.Active.TelemetryChannel.DeveloperMode = true;
+            }
+
             // Configure command service
             _commandService = new CommandService();
+            _commandService.Log += HandleLog;
             await _commandService.AddModulesAsync(typeof(HelpModule).GetTypeInfo().Assembly);
 
             // Configure and connect to Discord
@@ -81,7 +92,7 @@ namespace BundlesOfAmaze
 
         private async Task<DiscordSocketClient> ConfigureDiscordCLientAsync(IConfigurationRoot configuration)
         {
-            Console.Write("Connecting to Discord... ");
+            Console.WriteLine("Connecting to Discord... ");
 
             // Create a new instance of DiscordSocketClient.
             var client = new DiscordSocketClient(new DiscordSocketConfig()
@@ -93,8 +104,7 @@ namespace BundlesOfAmaze
                 MessageCacheSize = 100
             });
 
-            var logger = new Logger();
-            client.Log += logger.ClientOnLogAsync;
+            client.Log += HandleLog;
             client.MessageReceived += HandleCommandAsync;
 
             await client.LoginAsync(TokenType.Bot, configuration["Discord:Token"]);
@@ -103,64 +113,108 @@ namespace BundlesOfAmaze
             var prefix = GetPrefix();
             await client.SetGameAsync($"{prefix} help");
 
-            Console.WriteLine("OK");
-
             return client;
         }
 
         private async Task HandleCommandAsync(SocketMessage s)
         {
-            // Don't process the command if it was a System Message
-            var message = s as SocketUserMessage;
-            if (message == null)
+            try
             {
-                return;
-            }
-
-            var argPos = 0;
-            var prefix = GetPrefix();
-
-            // Check if the message has either a string or mention prefix
-            if (message.HasStringPrefix(prefix, ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
-            {
-                using (_container.BeginLifetimeScope())
+                // Don't process the command if it was a System Message
+                var message = s as SocketUserMessage;
+                if (message == null)
                 {
-                    // Initialize the owner service
-                    var authorId = message.Author.Id.ToString();
-                    var owner = await _container.Resolve<IOwnerRepository>().FindByAuthorIdAsync(authorId);
-                    var ownerService = _container.Resolve<IOwnerService>();
-                    ownerService.SetCurrentOwner(owner);
+                    return;
+                }
 
-                    var context = new SocketCommandContext(_client, message);
+                var argPos = 0;
+                var prefix = GetPrefix();
 
-                    IResult result;
-                    if (message.Content.Trim() == prefix)
+                // Check if the message has either a string or mention prefix
+                if (message.HasStringPrefix(prefix, ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+                {
+                    using (_container.BeginLifetimeScope())
                     {
-                        // Not sure how to handle a command with only the prefix yet
-                        result = await _commandService.ExecuteAsync(context, "overview", _serviceProvider);
-                    }
-                    else
-                    {
-                        // Try and execute a command with the given context
-                        result = await _commandService.ExecuteAsync(context, argPos + 1, _serviceProvider);
-                    }
+                        var telemetry = _container.Resolve<ITelemetryService>();
+                        var client = telemetry.Client;
+                        using (var operation = telemetry.Client.StartOperation<RequestTelemetry>("HandleCommand"))
+                        {
+                            // Initialize the owner service
+                            var authorId = message.Author.Id.ToString();
+                            var owner = await _container.Resolve<IOwnerRepository>().FindByAuthorIdAsync(authorId);
+                            var ownerService = _container.Resolve<IOwnerService>();
+                            ownerService.SetCurrentOwner(owner);
 
-                    // If execution failed, reply with the error message
-                    if (!result.IsSuccess)
-                    {
-                        await context.Channel.SendMessageAsync(result.ToString());
+                            if (owner != null)
+                            {
+                                client.Context.User.Id = authorId;
+                            }
+
+                            var context = new SocketCommandContext(_client, message);
+
+                            IResult result;
+                            if (message.Content.Trim() == prefix)
+                            {
+                                // Not sure how to handle a command with only the prefix yet
+                                result = await _commandService.ExecuteAsync(context, "overview", _serviceProvider);
+                            }
+                            else
+                            {
+                                // Try and execute a command with the given context
+                                result = await _commandService.ExecuteAsync(context, argPos + 1, _serviceProvider);
+                            }
+
+                            // If execution failed, reply with the error message
+                            if (!result.IsSuccess)
+                            {
+                                await context.Channel.SendMessageAsync(result.ToString());
+                            }
+
+                            // Set properties of containing telemetry item--for example:
+                            operation.Telemetry.ResponseCode = "200";
+
+                            // Optional: explicitly send telemetry item:
+                            client.StopOperation(operation);
+                        }
                     }
                 }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
             }
         }
 
         public async Task Tick()
         {
-            using (var scope = _container.BeginLifetimeScope())
+            try
             {
-                var backgroundService = scope.Resolve<IBackgroundService>();
-                await backgroundService.HandleTickAsync();
+                using (var scope = _container.BeginLifetimeScope())
+                {
+                    var backgroundService = scope.Resolve<IBackgroundService>();
+                    await backgroundService.HandleTickAsync();
+                }
             }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
+            }
+        }
+
+        private Task HandleLog(LogMessage logMessage)
+        {
+            Console.WriteLine(logMessage);
+
+            // Log all errors and criticals
+            if (logMessage.Severity < LogSeverity.Warning)
+            {
+                var telemetry = _container.Resolve<ITelemetryService>();
+                telemetry.Client.TrackException(logMessage.Exception);
+            }
+
+            return Task.FromResult(0);
         }
 
         private string GetPrefix()

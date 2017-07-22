@@ -12,13 +12,15 @@ namespace BundlesOfAmaze.Application
         private readonly ICurrentOwner _currentOwner;
         private readonly IAdventureEntryRepository _adventureEntryRepository;
         private readonly ICatRepository _catRepository;
+        private readonly ITelemetryService _telemetryService;
 
         public GoModule(ICurrentOwner currentOwner, IAdventureEntryRepository adventureEntryRepository,
-            ICatRepository catRepository)
+            ICatRepository catRepository, ITelemetryService telemetryService)
         {
             _currentOwner = currentOwner;
             _adventureEntryRepository = adventureEntryRepository;
             _catRepository = catRepository;
+            _telemetryService = telemetryService;
         }
 
         [Command("go")]
@@ -51,9 +53,13 @@ namespace BundlesOfAmaze.Application
             {
                 case "explore-neighbourhood":
                     var adventure = new AdventureExploreNeighbourhood();
-                    await RegisterAdventureAsync(cat, adventure);
 
+                    await RegisterAdventureAsync(cat, adventure);
                     Console.WriteLine($"Adding adventure {adventure.AdventureRef} for cat {cat.Id}");
+
+                    // Track event
+                    _telemetryService.TrackGoCommand(_currentOwner.Owner, cat, adventure);
+
                     await ReplyAsync($"{cat.Name} embarks on {adventure.Name}. {cat.Pronoun} will return in {adventure.Duration.TotalMinutes} minutes.");
                     return;
 

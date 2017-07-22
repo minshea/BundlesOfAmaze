@@ -94,7 +94,7 @@ namespace BundlesOfAmaze.Application
             // TODO: For now we select the default channel. Replace with configurable channel
             var channel = guild.GetTextChannel(guild.DefaultChannel.Id);
 
-            await channel.SendMessageAsync($"{cat.Name} got {reward.Quantity} {item.Name}! (user)");
+            await channel.SendMessageAsync($"{cat.Name} got {reward.Quantity} {item.Name}!");
         }
     }
 }

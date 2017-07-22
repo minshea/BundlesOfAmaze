@@ -24,13 +24,18 @@ namespace BundlesOfAmaze.Application
 
             if (adventure != null && adventureEnd.HasValue)
             {
-                var remaining = adventureEnd.Value - DateTimeOffset.UtcNow;
+                var remaining = "completed";
+                var remainingTime = adventureEnd.Value - DateTimeOffset.UtcNow;
+                if (remainingTime.TotalMilliseconds > 0)
+                {
+                    remaining = remainingTime.ToString("hh:mm:ss");
+                }
 
                 var adventureField = new EmbedFieldBuilder
                 {
                     IsInline = false,
                     Name = "Current adventure",
-                    Value = $"{adventure} - {remaining.ToString("HH:mm:ss", CultureInfo.InvariantCulture)} remaining"
+                    Value = $"{adventure} - {remaining} remaining"
                 };
                 embedBuilder.AddField(adventureField);
             }

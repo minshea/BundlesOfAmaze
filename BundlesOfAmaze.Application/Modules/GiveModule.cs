@@ -11,12 +11,16 @@ namespace BundlesOfAmaze.Application
         private readonly ICurrentOwner _currentOwner;
         private readonly ICatRepository _catRepository;
         private readonly IItemRepository _itemRepository;
+        private readonly IOverviewService _overviewService;
+        private readonly ITelemetryService _telemetryService;
 
-        public GiveModule(ICurrentOwner currentOwner, ICatRepository catRepository, IItemRepository itemRepository)
+        public GiveModule(ICurrentOwner currentOwner, ICatRepository catRepository, IItemRepository itemRepository, IOverviewService overviewService, ITelemetryService telemetryService)
         {
             _currentOwner = currentOwner;
             _catRepository = catRepository;
             _itemRepository = itemRepository;
+            _overviewService = overviewService;
+            _telemetryService = telemetryService;
         }
 
         [Command("give"), Alias("g")]
@@ -25,6 +29,7 @@ namespace BundlesOfAmaze.Application
         public async Task HandleAsync(string itemName)
         {
             ////.amazecats give itemname
+            var amount = 1;
 
             var item = await _itemRepository.FindByNameAsync(itemName);
             if (item == null)
@@ -33,10 +38,11 @@ namespace BundlesOfAmaze.Application
                 return;
             }
 
-            var inventoryItem = _currentOwner.Owner.GetItem(item.ItemRef);
-            if (inventoryItem == null)
+            var result = _currentOwner.Owner.FetchItem(item.ItemRef, amount);
+            if (!result)
             {
-                await ReplyAsync($"You do not have any {item.Name}");
+                ////await ReplyAsync($"You do not have any {item.Name}");
+                await ReplyAsync($"You do not have enough {item.Name}");
                 return;
             }
 
@@ -47,14 +53,14 @@ namespace BundlesOfAmaze.Application
                 return;
             }
 
-            var result = inventoryItem.DecreaseQuantity(1);
-            if (!result)
-            {
-                await ReplyAsync($"You do not have enough {item.Name}");
-                return;
-            }
+            ////var result = inventoryItem.DecreaseQuantity(1);
+            ////if (!result)
+            ////{
+            ////    await ReplyAsync($"You do not have enough {item.Name}");
+            ////    return;
+            ////}
 
-            cat.GiveItem(item, 1);
+            cat.GiveItem(item, amount);
 
             await _catRepository.SaveChangesAsync();
 
@@ -76,7 +82,11 @@ namespace BundlesOfAmaze.Application
                     break;
             }
 
-            await ReplyAsync(message, embed: CatSheet.GetSheet(cat));
+            // Track event
+            _telemetryService.TrackGiveCommand(_currentOwner.Owner, cat, item, amount);
+
+            var overview = await _overviewService.GetOverviewAsync(cat);
+            await ReplyAsync(message, embed: overview.Embed);
         }
     }
 }

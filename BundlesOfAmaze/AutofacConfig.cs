@@ -10,7 +10,10 @@ namespace BundlesOfAmaze.InversionOfControl
         {
             builder.RegisterType<DataContext>().As<IDataContext>().WithParameter("connectionString", connectionString).InstancePerLifetimeScope();
             builder.RegisterType<BackgroundService>().As<IBackgroundService>();
+
             builder.RegisterType<OwnerService>().As<IOwnerService, ICurrentOwner>().InstancePerLifetimeScope();
+            builder.RegisterType<OverviewService>().As<IOverviewService>();
+            builder.RegisterType<TelemetryService>().As<ITelemetryService>().InstancePerLifetimeScope();
 
             builder.RegisterType<CatRepository>().As<ICatRepository>();
             builder.RegisterType<OwnerRepository>().As<IOwnerRepository>();

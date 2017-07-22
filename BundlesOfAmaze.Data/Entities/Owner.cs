@@ -40,5 +40,22 @@ namespace BundlesOfAmaze.Data
                 existing.AddQuantity(quantity);
             }
         }
+
+        public bool FetchItem(ItemRef itemRef, int amount)
+        {
+            var inventoryItem = InventoryItems.FirstOrDefault(i => i.ItemRef == itemRef);
+            if (inventoryItem == null || inventoryItem.Quantity < amount)
+            {
+                return false;
+            }
+
+            inventoryItem.DecreaseQuantity(amount);
+            if (inventoryItem.Quantity == 0)
+            {
+                InventoryItems.Remove(inventoryItem);
+            }
+
+            return true;
+        }
     }
 }

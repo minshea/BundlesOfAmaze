@@ -71,7 +71,7 @@ namespace BundlesOfAmaze.Shared {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You do not own a cat.
+        ///   Looks up a localized string similar to You don&apos;t have a cat yet!\nCreate one using the &apos;create&apos; command..
         /// </summary>
         public static string CatNotOwned {
             get {

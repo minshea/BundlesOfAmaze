@@ -13,12 +13,14 @@ namespace BundlesOfAmaze.Application
         private readonly ICurrentOwner _currentOwner;
         private readonly ICatRepository _repository;
         private readonly IOwnerRepository _ownerRepository;
+        private readonly ITelemetryService _telemetryService;
 
-        public CreateModule(ICurrentOwner currentOwner, ICatRepository repository, IOwnerRepository ownerRepository)
+        public CreateModule(ICurrentOwner currentOwner, ICatRepository repository, IOwnerRepository ownerRepository, ITelemetryService telemetryService)
         {
             _currentOwner = currentOwner;
             _repository = repository;
             _ownerRepository = ownerRepository;
+            _telemetryService = telemetryService;
         }
 
         [Command("create")]
@@ -59,6 +61,9 @@ namespace BundlesOfAmaze.Application
             // Store the new cat
             _repository.Add(newCat);
             await _repository.SaveChangesAsync();
+
+            // Track event
+            _telemetryService.TrackCreateCommand(_currentOwner.Owner, newCat);
 
             var catSheet = CatSheet.GetSheet(newCat);
             var message = $"{newCat.Name} happily meets {newCat.Posessive} new master\n";

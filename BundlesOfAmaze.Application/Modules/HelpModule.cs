@@ -8,9 +8,9 @@ namespace BundlesOfAmaze.Application
     [Name("Help")]
     public class HelpModule : ModuleBase<SocketCommandContext>
     {
-        private readonly Discord.Commands.CommandService _commandService;
+        private readonly CommandService _commandService;
 
-        public HelpModule(Discord.Commands.CommandService commandService)
+        public HelpModule(CommandService commandService)
         {
             _commandService = commandService;
         }

@@ -121,7 +121,7 @@
     <value>You are already on an adventure</value>
   </data>
   <data name="CatNotOwned" xml:space="preserve">
-    <value>You do not own a cat</value>
+    <value>You don't have a cat yet!\nCreate one using the 'create' command.</value>
   </data>
   <data name="InvalidCommand" xml:space="preserve">
     <value>Invalid command</value>
