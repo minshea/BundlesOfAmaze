@@ -16,6 +16,8 @@ namespace BundlesOfAmaze.Application
         }
 
         [Command("help")]
+        [Summary("Main help page")]
+        [Remarks("Usage: help")]
         public async Task HandleAsync()
         {
             var builder = new EmbedBuilder()
@@ -51,6 +53,8 @@ namespace BundlesOfAmaze.Application
         }
 
         [Command("help")]
+        [Summary("[command]")]
+        [Remarks("Usage: help [command]")]
         public async Task HandleAsync(string command)
         {
             var result = _commandService.Search(Context, command);

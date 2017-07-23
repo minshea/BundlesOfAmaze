@@ -33,7 +33,7 @@ namespace BundlesOfAmaze.Application
                 var remainingTime = adventureEnd.Value - DateTimeOffset.UtcNow;
                 if (remainingTime.TotalMilliseconds > 0)
                 {
-                    remaining = remainingTime.ToString("hh:mm:ss");
+                    remaining = remainingTime.ToString(@"hh\:mm\:ss");
                 }
 
                 var adventureField = new EmbedFieldBuilder
