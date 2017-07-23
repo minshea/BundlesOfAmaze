@@ -15,7 +15,7 @@ namespace BundlesOfAmaze.Application
             _adventureEntryRepository = adventureEntryRepository;
         }
 
-        public async Task<ResultMessage> GetOverviewAsync(Cat cat)
+        public async Task<ResultMessage> GetOverviewAsync(ICurrentOwner currentOwner, Cat cat)
         {
             Embed embed;
 
@@ -24,11 +24,11 @@ namespace BundlesOfAmaze.Application
             {
                 var adventure = _adventureRepository.FindByAdventureRef(adventureEntry.AdventureRef);
 
-                embed = CatSheet.GetSheet(cat, adventure.Name, adventureEntry.End);
+                embed = CatSheet.GetSheet(currentOwner, cat, string.Empty, adventure, adventureEntry.End);
             }
             else
             {
-                embed = CatSheet.GetSheet(cat);
+                embed = CatSheet.GetSheet(currentOwner, cat);
             }
 
             return new ResultMessage(string.Empty, embed);

@@ -14,12 +14,12 @@ namespace BundlesOfAmaze.Application
             Client = new TelemetryClient(TelemetryConfiguration.Active);
         }
 
-        public void TrackOverviewCommand(Owner owner, Cat cat)
+        public void TrackOverviewCommand(ICurrentOwner owner, Cat cat)
         {
             var properties = new Dictionary<string, string>()
             {
-                { "ownerId", owner.Id.ToString() },
-                { "ownerName", owner.Name },
+                { "ownerId", owner.Owner.Id.ToString() },
+                { "ownerName", owner.Owner.Name },
                 { "catId", cat.Id.ToString() },
                 { "catName", cat.Name }
             };
@@ -28,12 +28,12 @@ namespace BundlesOfAmaze.Application
             Client.Flush();
         }
 
-        public void TrackGiveCommand(Owner owner, Cat cat, Item item, int amount)
+        public void TrackGiveCommand(ICurrentOwner owner, Cat cat, Item item, int amount)
         {
             var properties = new Dictionary<string, string>()
             {
-                { "ownerId", owner.Id.ToString() },
-                { "ownerName", owner.Name },
+                { "ownerId", owner.Owner.Id.ToString() },
+                { "ownerName", owner.Owner.Name},
                 { "catId", cat.Id.ToString() },
                 { "catName", cat.Name },
                 { "itemRef", item.ItemRef.ToString() },
@@ -49,12 +49,12 @@ namespace BundlesOfAmaze.Application
             Client.Flush();
         }
 
-        public void TrackGoCommand(Owner owner, Cat cat, Adventure adventure)
+        public void TrackGoCommand(ICurrentOwner owner, Cat cat, Adventure adventure)
         {
             var properties = new Dictionary<string, string>()
             {
-                { "ownerId", owner.Id.ToString() },
-                { "ownerName", owner.Name },
+                { "ownerId", owner.Owner.Id.ToString() },
+                { "ownerName", owner.Owner.Name },
                 { "catId", cat.Id.ToString() },
                 { "catName", cat.Name },
                 { "adventureRef", adventure.AdventureRef.ToString() }
@@ -64,12 +64,12 @@ namespace BundlesOfAmaze.Application
             Client.Flush();
         }
 
-        public void TrackCreateCommand(Owner owner, Cat cat)
+        public void TrackCreateCommand(ICurrentOwner owner, Cat cat)
         {
             var properties = new Dictionary<string, string>()
             {
-                { "ownerId", owner.Id.ToString() },
-                { "ownerName", owner.Name },
+                { "ownerId", owner.Owner.Id.ToString() },
+                { "ownerName", owner.Owner.Name },
                 { "catId", cat.Id.ToString() },
                 { "catName", cat.Name }
             };

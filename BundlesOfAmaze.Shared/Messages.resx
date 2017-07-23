@@ -120,6 +120,12 @@
   <data name="AdventureNotNull" xml:space="preserve">
     <value>You are already on an adventure</value>
   </data>
+  <data name="CatAlreadyOwned" xml:space="preserve">
+    <value>You already own a cat!</value>
+  </data>
+  <data name="CatNameExistsFormat" xml:space="preserve">
+    <value>A cat with the name '{0}' already exists</value>
+  </data>
   <data name="CatNotOwned" xml:space="preserve">
     <value>You don't have a cat yet!\nCreate one using the 'create' command.</value>
   </data>

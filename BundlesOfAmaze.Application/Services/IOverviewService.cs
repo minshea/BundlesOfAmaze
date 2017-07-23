@@ -5,6 +5,6 @@ namespace BundlesOfAmaze.Application
 {
     public interface IOverviewService
     {
-        Task<ResultMessage> GetOverviewAsync(Cat cat);
+        Task<ResultMessage> GetOverviewAsync(ICurrentOwner currentOwner, Cat cat);
     }
 }

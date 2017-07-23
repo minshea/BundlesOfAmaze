@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using BundlesOfAmaze.Data;
 using Discord;
 
@@ -7,11 +6,17 @@ namespace BundlesOfAmaze.Application
 {
     public static class CatSheet
     {
-        public static Embed GetSheet(Cat cat, string adventure = null, DateTimeOffset? adventureEnd = null)
+        public static Embed GetSheet(ICurrentOwner currentOwner, Cat cat, string message = null, Adventure adventure = null, DateTimeOffset? adventureEnd = null)
         {
             var embedBuilder = new EmbedBuilder
             {
-                Author = new EmbedAuthorBuilder() { Name = cat.Name }
+                Color = new Color(50, 184, 31),
+                Author = new EmbedAuthorBuilder
+                {
+                    Name = $"{currentOwner.Owner.Name}'s {cat.Name}",
+                    IconUrl = currentOwner.Owner.AvatarUrl
+                },
+                Description = message
             };
 
             var ageField = new EmbedFieldBuilder
@@ -35,7 +40,7 @@ namespace BundlesOfAmaze.Application
                 {
                     IsInline = false,
                     Name = "Current adventure",
-                    Value = $"{adventure} - {remaining} remaining"
+                    Value = $"{adventure.Name} - {remaining} remaining"
                 };
                 embedBuilder.AddField(adventureField);
             }
@@ -87,6 +92,30 @@ namespace BundlesOfAmaze.Application
                 Value = cat.Stats.Outgoing
             };
             embedBuilder.AddField(outgoingField);
+
+            return embedBuilder.Build();
+        }
+
+        public static Embed GetRewardSheet(Owner owner, Cat cat, Adventure adventure, Item item, DropPoolItem reward)
+        {
+            var embedBuilder = new EmbedBuilder
+            {
+                Color = new Color(226, 193, 5),
+                Author = new EmbedAuthorBuilder
+                {
+                    Name = $"{owner.Name}'s {cat.Name}",
+                    IconUrl = owner.AvatarUrl
+                },
+                Description = $"{cat.Name} has returned from {adventure.Name} and brought:"
+            };
+
+            var itemField = new EmbedFieldBuilder
+            {
+                IsInline = true,
+                Name = $"{reward.Quantity}x {item.Name}",
+                Value = item.Description
+            };
+            embedBuilder.AddField(itemField);
 
             return embedBuilder.Build();
         }

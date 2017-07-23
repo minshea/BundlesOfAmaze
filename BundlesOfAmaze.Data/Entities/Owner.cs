@@ -1,11 +1,15 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
+using Discord;
 
 namespace BundlesOfAmaze.Data
 {
     public class Owner : Entity
     {
         public string AuthorId { get; private set; }
+
+        public string AvatarUrl { get; private set; }
 
         public string Name { get; private set; }
 
@@ -16,11 +20,23 @@ namespace BundlesOfAmaze.Data
             InventoryItems = new Collection<OwnerInventoryItem>();
         }
 
-        public Owner(string authorId, string name)
+        public Owner(IUser user)
             : this()
         {
-            AuthorId = authorId;
-            Name = name;
+            AuthorId = user.Id.ToString();
+            Name = user.Username;
+            AvatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 64);
+        }
+
+        public void Update(IUser user)
+        {
+            if (AuthorId != user.Id.ToString())
+            {
+                throw new ArgumentException($"The given user {user.Id} does not match the one that is updated {AuthorId}!");
+            }
+
+            Name = user.Username;
+            AvatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 64);
         }
 
         public OwnerInventoryItem GetItem(ItemRef itemRef)

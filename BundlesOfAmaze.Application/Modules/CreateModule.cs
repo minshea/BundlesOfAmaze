@@ -28,8 +28,6 @@ namespace BundlesOfAmaze.Application
         [Remarks("Usage: create [name] [gender:male|female]\nCommand to create a new cat\nex. create Kitty female")]
         public async Task HandleAsync(string rawName, string rawGender)
         {
-            ////.amazecats create Name Male
-
             if (string.IsNullOrWhiteSpace(rawName) || string.IsNullOrWhiteSpace(rawGender))
             {
                 await ReplyAsync(Messages.InvalidCommand);
@@ -42,38 +40,49 @@ namespace BundlesOfAmaze.Application
             var existingCat = await _repository.FindByNameAsync(name);
             if (existingCat != null)
             {
-                await ReplyAsync($"Error: A cat with the name '{name}' already exists");
+                await ReplyAsync(string.Format(Messages.CatNameExistsFormat, name));
                 return;
             }
 
             if (!Enum.TryParse(rawGender.Trim(), true, out Gender gender) || gender == Gender.None)
             {
-                await ReplyAsync($"Error: Valid genders are '{Gender.Male}' and '{Gender.Female}'");
+                await ReplyAsync($"Valid genders are '{Gender.Male}' and '{Gender.Female}'");
+                return;
+            }
+
+            // Check if the current owner already has a cat
+            if (_currentOwner.Cat != null)
+            {
+                await ReplyAsync(Messages.CatAlreadyOwned);
                 return;
             }
 
             // If there is no owner yet, generate one
-            var owner = _currentOwner.Owner ?? await CreateOwnerAsync(Context.Message.Author);
+            if (_currentOwner.Owner == null)
+            {
+                var owner = await CreateOwnerAsync(Context.Message.Author);
+                await ((IOwnerService)_currentOwner).SetCurrentOwner(owner);
+            }
 
             // Generate the new cat
-            var newCat = new Cat(owner.Id, name, gender);
+            var newCat = new Cat(_currentOwner.Owner.Id, name, gender);
 
             // Store the new cat
             _repository.Add(newCat);
             await _repository.SaveChangesAsync();
 
             // Track event
-            _telemetryService.TrackCreateCommand(_currentOwner.Owner, newCat);
+            _telemetryService.TrackCreateCommand(_currentOwner, newCat);
 
-            var catSheet = CatSheet.GetSheet(newCat);
             var message = $"{newCat.Name} happily meets {newCat.Posessive} new master\n";
+            var catSheet = CatSheet.GetSheet(_currentOwner, newCat, message);
 
-            await ReplyAsync(message, embed: catSheet);
+            await ReplyAsync(string.Empty, embed: catSheet);
         }
 
         private async Task<Owner> CreateOwnerAsync(IUser user)
         {
-            var owner = new Owner(user.Id.ToString(), user.Username);
+            var owner = new Owner(user);
 
             // Give some initial items for the new owner to start out with
             owner.GiveItem(ItemRef.Water, 10);

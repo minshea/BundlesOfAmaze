@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using BundlesOfAmaze.Data;
 using BundlesOfAmaze.Shared;
 using Discord.Commands;
 
@@ -9,14 +8,12 @@ namespace BundlesOfAmaze.Application
     public class OverviewModule : ModuleBase
     {
         private readonly ICurrentOwner _currentOwner;
-        private readonly ICatRepository _catRepository;
         private readonly IOverviewService _overviewService;
         private readonly ITelemetryService _telemetryService;
 
-        public OverviewModule(ICurrentOwner currentOwner, ICatRepository catRepository, IOverviewService overviewService, ITelemetryService telemetryService)
+        public OverviewModule(ICurrentOwner currentOwner, IOverviewService overviewService, ITelemetryService telemetryService)
         {
             _currentOwner = currentOwner;
-            _catRepository = catRepository;
             _overviewService = overviewService;
             _telemetryService = telemetryService;
         }
@@ -30,17 +27,16 @@ namespace BundlesOfAmaze.Application
                 return;
             }
 
-            var cat = await _catRepository.FindByOwnerAsync(_currentOwner.Owner.Id);
-            if (cat == null)
+            if (_currentOwner.Cat == null)
             {
                 await ReplyAsync(Messages.CatNotOwned);
                 return;
             }
 
             // Track event
-            _telemetryService.TrackOverviewCommand(_currentOwner.Owner, cat);
+            _telemetryService.TrackOverviewCommand(_currentOwner, _currentOwner.Cat);
 
-            var overview = await _overviewService.GetOverviewAsync(cat);
+            var overview = await _overviewService.GetOverviewAsync(_currentOwner, _currentOwner.Cat);
             await ReplyAsync(overview.Message, embed: overview.Embed);
         }
     }

@@ -94,7 +94,9 @@ namespace BundlesOfAmaze.Application
             // TODO: For now we select the default channel. Replace with configurable channel
             var channel = guild.GetTextChannel(guild.DefaultChannel.Id);
 
-            await channel.SendMessageAsync($"{cat.Name} got {reward.Quantity} {item.Name}!");
+            var embed = CatSheet.GetRewardSheet(owner, cat, adventure, item, reward);
+            await channel.SendMessageAsync(string.Empty, embed: embed);
+            ////await channel.SendMessageAsync($"{cat.Name} got {reward.Quantity} {item.Name}!");
         }
     }
 }

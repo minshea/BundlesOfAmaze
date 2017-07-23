@@ -26,8 +26,6 @@ namespace BundlesOfAmaze.Application
         [Remarks("Usage: list")]
         public async Task HandleAsync()
         {
-            ////.amazecats list
-
             var message = "\n**Lists**\n";
             message += "inventory - Your inventory\n";
             message += "adventures - Available adventures\n";
@@ -41,8 +39,6 @@ namespace BundlesOfAmaze.Application
         [Remarks("Usage: list [name]\nCommand to list activities or adventures your cat can embark on")]
         public async Task HandleAsync(string list)
         {
-            ////.amazecats list adventures
-
             var message = string.Empty;
             var embed = default(Embed);
 
@@ -65,7 +61,12 @@ namespace BundlesOfAmaze.Application
 
                     var embedBuilder = new EmbedBuilder
                     {
-                        Color = new Color(226, 193, 5)
+                        Color = new Color(226, 193, 5),
+                        Author = new EmbedAuthorBuilder
+                        {
+                            Name = $"{_currentOwner.Owner.Name}'s inventory",
+                            IconUrl = _currentOwner.Owner.AvatarUrl
+                        }
                     };
 
                     foreach (var item in items.OrderBy(i => i.Name))
@@ -81,7 +82,6 @@ namespace BundlesOfAmaze.Application
                         embedBuilder.AddField(itemField);
                     }
 
-                    message = $"**{_currentOwner.Owner.Name}'s inventory**\n";
                     embed = embedBuilder.Build();
                     break;
 

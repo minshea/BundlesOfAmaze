@@ -71,6 +71,24 @@ namespace BundlesOfAmaze.Shared {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You already own a cat!.
+        /// </summary>
+        public static string CatAlreadyOwned {
+            get {
+                return ResourceManager.GetString("CatAlreadyOwned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A cat with the name &apos;{0}&apos; already exists.
+        /// </summary>
+        public static string CatNameExistsFormat {
+            get {
+                return ResourceManager.GetString("CatNameExistsFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have a cat yet!\nCreate one using the &apos;create&apos; command..
         /// </summary>
         public static string CatNotOwned {

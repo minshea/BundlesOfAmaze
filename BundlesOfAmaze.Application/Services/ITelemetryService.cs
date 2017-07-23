@@ -7,12 +7,12 @@ namespace BundlesOfAmaze.Application
     {
         TelemetryClient Client { get; }
 
-        void TrackOverviewCommand(Owner owner, Cat cat);
+        void TrackOverviewCommand(ICurrentOwner owner, Cat cat);
 
-        void TrackGiveCommand(Owner owner, Cat cat, Item item, int amount);
+        void TrackGiveCommand(ICurrentOwner owner, Cat cat, Item item, int amount);
 
-        void TrackGoCommand(Owner owner, Cat cat, Adventure adventure);
+        void TrackGoCommand(ICurrentOwner owner, Cat cat, Adventure adventure);
 
-        void TrackCreateCommand(Owner owner, Cat cat);
+        void TrackCreateCommand(ICurrentOwner owner, Cat cat);
     }
 }

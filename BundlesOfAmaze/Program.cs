@@ -141,14 +141,12 @@ namespace BundlesOfAmaze
                         using (var operation = telemetry.Client.StartOperation<RequestTelemetry>("HandleCommand"))
                         {
                             // Initialize the owner service
-                            var authorId = message.Author.Id.ToString();
-                            var owner = await _container.Resolve<IOwnerRepository>().FindByAuthorIdAsync(authorId);
                             var ownerService = _container.Resolve<IOwnerService>();
-                            ownerService.SetCurrentOwner(owner);
+                            await ownerService.Initialize(message.Author);
 
-                            if (owner != null)
+                            if (((ICurrentOwner)ownerService).Owner != null)
                             {
-                                client.Context.User.Id = authorId;
+                                client.Context.User.Id = message.Author.Id.ToString();
                             }
 
                             var context = new SocketCommandContext(_client, message);

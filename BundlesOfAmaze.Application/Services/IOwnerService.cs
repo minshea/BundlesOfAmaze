@@ -1,9 +1,13 @@
-﻿using BundlesOfAmaze.Data;
+﻿using System.Threading.Tasks;
+using BundlesOfAmaze.Data;
+using Discord;
 
 namespace BundlesOfAmaze.Application
 {
     public interface IOwnerService
     {
-        void SetCurrentOwner(Owner owner);
+        Task Initialize(IUser user);
+
+        Task SetCurrentOwner(Owner owner);
     }
 }
